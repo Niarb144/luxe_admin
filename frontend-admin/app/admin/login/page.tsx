@@ -48,7 +48,7 @@ export default function AdminLogin() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="w-full bg-black text-white py-2 rounded">
+        <button className="w-full bg-black text-white py-2 rounded cursor-pointer">
           Login
         </button>
       </form>

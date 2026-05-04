@@ -11,7 +11,7 @@ export default async function ProtectedLayout({ children }: any) {
 
   // 🚫 Not logged in
   if (!user) {
-    redirect("/login");
+    redirect("./login");
   }
 
   return <>{children}</>;

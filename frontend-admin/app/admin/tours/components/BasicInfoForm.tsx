@@ -125,7 +125,7 @@ export default function BasicInfoForm({ onSuccess }: any) {
         <div className="flex justify-end">
             <button
             type="submit"
-            className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition"
+            className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
             >
             Continue →
             </button>

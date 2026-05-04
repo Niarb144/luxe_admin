@@ -14,7 +14,7 @@ export default async function AdminPage() {
     <>
     <div>Welcome, {user.email}</div>
     <LogoutButton />
-    <Link href="/tours" className="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+    <Link href="/admin/tours" className="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
         Create Tour
       </Link>
     </>

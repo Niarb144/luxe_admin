@@ -19,6 +19,9 @@ export default function Step1Basic({ next }: any) {
       .select()
       .single();
 
+      console.log("NEW TOUR:", data);
+      console.log("GENERATED ID:", data.id);
+
     if (error) {
       console.error(error);
       return;

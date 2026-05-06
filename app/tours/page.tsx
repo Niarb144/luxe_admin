@@ -10,25 +10,93 @@ export default async function ToursPage() {
 
   console.log("SESSION:", session);
 
+  // 🔒 Guard clause stays exactly as you had it
   if (!session) {
     return (
-      <div className="p-10 text-white bg-black">
+      <div className="p-10 text-white bg-black min-h-screen">
         <h1>Not logged in</h1>
       </div>
     );
   }
 
+  // 📦 Fetch tours AFTER auth check
+  const { data: tours, error } = await supabase
+    .from("tours")
+    .select("id, title, duration, location, price")
+    .order("created_at", { ascending: false });
+
+    console.log("TOURS:", tours);
+    console.log("ERROR:", error);
+
   return (
-    <div className="p-10 text-white bg-black min-h-screen">
-      <h1 className="text-3xl font-bold">Protected Tours Page</h1>
+    <div className="p-10 bg-black min-h-screen text-white">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Tours Management</h1>
 
-      <Link href="/admin" className="text-amber-500 hover:underline">
-        Go to Admin Home
-      </Link>
+        <div className="space-x-4">
+          <Link href="/admin" className="text-amber-500 hover:underline">
+            Admin Home
+          </Link>
 
-      <Link href="/tours/create" className="ml-4 text-amber-500 hover:underline">
-        Create New Tour
-      </Link>
+          <Link href="/tours/create" className="text-amber-500 hover:underline">
+            + Create New Tour
+          </Link>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white text-black rounded-lg overflow-hidden shadow-lg">
+        <table className="w-full">
+          <thead className="bg-gray-200 text-left text-sm uppercase">
+            <tr>
+              <th className="px-6 py-3">Name</th>
+              <th className="px-6 py-3">Days</th>
+              <th className="px-6 py-3">Location</th>
+              <th className="px-6 py-3">Price</th>
+              <th className="px-6 py-3">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y">
+            {tours?.map((tour) => (
+              <tr key={tour.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 font-semibold text-gray-900">
+                  {tour.title}
+                </td>
+
+                <td className="px-6 py-4 text-gray-900">
+                  {tour.duration} days
+                </td>
+
+                <td className="px-6 py-4 text-gray-900">
+                  {tour.location}
+                </td>
+
+                <td className="px-6 py-4 font-bold text-gray-900">
+                  ${tour.price}
+                </td>
+                <td className="px-6 py-4">
+                  <Link href={`/tours/${tour.id}/edit`} className="text-amber-500 hover:underline">
+                    Edit
+                  </Link>
+                  <Link href={`/tours/${tour.id}/preview`} className="ml-4 text-green-500 hover:underline">
+                    Preview
+                  </Link>
+                </td>
+              </tr>
+            ))}
+
+            {tours?.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  No tours found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

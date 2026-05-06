@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase-server";
+import { link } from "fs";
+import Link from "next/link";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -21,10 +23,10 @@ export default async function AdminPage() {
     .select("*", { count: "exact", head: true });
 
   const stats = [
-    { label: "Tours", value: toursCount ?? 0 },
-    { label: "Bookings", value: bookingsCount ?? 0 },
-    { label: "Destinations", value: destinationsCount ?? 0 },
-    { label: "Blogs", value: blogsCount ?? 0 },
+    { label: "Tours", value: toursCount ?? 0 , link: "/tours", addLink: "/tours/create" },
+    { label: "Bookings", value: bookingsCount ?? 0, link: "/bookings", addLink: "/bookings/create" },
+    { label: "Destinations", value: destinationsCount ?? 0, link: "/destinations", addLink: "/destinations/create" },
+    { label: "Blogs", value: blogsCount ?? 0, link: "/blogs", addLink: "/blogs/create" },
   ];
 
   return (
@@ -44,6 +46,20 @@ export default async function AdminPage() {
             <h2 className="text-3xl font-bold text-gray-900 mt-2">
               {stat.value}
             </h2>
+            <div className="mt-4">
+              <Link
+                href={stat.link}
+                className="text-amber-500 font-semibold hover:underline"
+              >
+                View All
+              </Link>
+              <Link
+                href={stat.addLink}
+                className="ml-4 text-green-500 font-semibold hover:underline"
+              >
+                + Add New
+              </Link>
+            </div>
           </div>
         ))}
       </div>

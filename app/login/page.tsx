@@ -4,11 +4,13 @@ import { useState } from "react";
 import { signIn } from "@/lib/actions/auth";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: any) {
   e.preventDefault();
@@ -31,9 +33,9 @@ export default function LoginPage() {
 }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[url('/safari-bg.jpg')] bg-cover bg-center">
+    <div className="min-h-screen flex items-center justify-center bg-[url('/images/img3.webp')] bg-cover bg-center">
       <div className="bg-black/60 backdrop-blur-lg p-8 rounded-2xl w-full max-w-md text-white">
-        <h1 className="text-3xl font-bold mb-6 text-center">
+        <h1 className="text-3xl font-bold mb-6 text-center text-white">
           Welcome Back 
         </h1>
 
@@ -48,13 +50,24 @@ export default function LoginPage() {
             className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
           />
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            required
-            className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
-          />
+          <div className="relative">
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              required
+              className="w-full p-3 pr-10 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
+            />
+
+            {/* Toggle button */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-amber-500 cursor-pointer"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
           <button
             disabled={loading}

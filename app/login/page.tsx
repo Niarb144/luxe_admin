@@ -8,23 +8,27 @@ import { supabase } from "@/lib/supabase";
 export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: any) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+  e.preventDefault();
+  setLoading(true); 
+  setError("");
 
-    const res = await signIn(formData);
-    
-    if (res?.error) {
-      setError(res.error);
-    } else {
-      router.push("/admin");
-    }
+  const formData = new FormData(e.target);
 
-    const { data } = await supabase.auth.getSession();
-    console.log("SESSION:", data.session);
+  const res = await signIn(formData);
 
+  if (res?.error) {
+    setError(res.error);
+    setLoading(false); // ❌ stop loading on error
+  } else {
+    router.push("/admin"); // ✅ keep loading during redirect
   }
+
+  const { data } = await supabase.auth.getSession();
+  console.log("SESSION:", data.session);
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('/safari-bg.jpg')] bg-cover bg-center">
@@ -52,8 +56,19 @@ export default function LoginPage() {
             className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
           />
 
-          <button className="w-full bg-amber-600 hover:bg-amber-700 p-3 rounded-lg font-semibold">
-            Login
+          <button
+            disabled={loading}
+            className="w-full bg-amber-600 hover:bg-amber-700 p-3 rounded-lg font-semibold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+          >
+            {loading ? (
+              <>
+                {/* Spinner */}
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 

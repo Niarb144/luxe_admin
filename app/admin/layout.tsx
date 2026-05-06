@@ -3,6 +3,12 @@ import LogoutButton from "@/components/LogoutButton";
 import { createClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
+import Footer from "@/components/Footer";
+
+export const metadata = {
+  title: "Admin Dashboard",
+  description: "Manage tours, destinations, accommodations, and blogs.",
+};
 
 export default async function AdminLayout({
   children,
@@ -34,6 +40,7 @@ export default async function AdminLayout({
 
         {/* Page content */}
         <main className="p-6">{children}</main>
+        <Footer />
       </div>
     </div>
   );

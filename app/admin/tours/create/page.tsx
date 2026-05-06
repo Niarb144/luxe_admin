@@ -7,6 +7,7 @@ import Step3Exclusions from "@/components/tour/Step3Exclusions";
 import Step4Itinerary from "@/components/tour/Step4Itinerary";
 import Step5Images from "@/components/tour/Step5Images";
 import Step6Route from "@/components/tour/Step6Route";
+// import Step7FAQs from "@/components/tour/Step7FAQ";
 import { supabase } from "@/lib/supabase";
 
 export default function CreateTourPage() {
@@ -21,6 +22,7 @@ export default function CreateTourPage() {
     itinerary: [] as any[],
     images: [] as File[],
     route: null as File | null,
+    // faq: [] as String[],
   });
 
   
@@ -78,6 +80,10 @@ export default function CreateTourPage() {
       {step === 6 && (
         <Step6Route tourId={tourId!} />
       )}
+
+      {/* {step === 7 && (
+        <Step7FAQs tourId={tourId!} />
+      )} */}
     </div>
   );
 }

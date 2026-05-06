@@ -2,102 +2,89 @@
 
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 export default function Step6Route({ tourId, next }: any) {
-  const [file, setFile] = useState<File | null>(null);
   const [mapUrl, setMapUrl] = useState("");
-  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSave() {
-    if (!tourId) {
-      console.error("Missing tourId");
+    if (!tourId) return;
+
+    if (!mapUrl.trim()) {
+      alert("Please add a map URL");
       return;
     }
 
-    setUploading(true);
+    setLoading(true);
 
-    let finalUrl = "";
-
-    // ✅ OPTION 1: If user provided a URL
-    if (mapUrl.trim()) {
-      finalUrl = mapUrl;
-    }
-
-    // ✅ OPTION 2: If user uploaded a file
-    else if (file) {
-      const fileName = `${tourId}/${Date.now()}-${file.name}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("tour_route_maps")
-        .upload(fileName, file);
-
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        setUploading(false);
-        return;
-      }
-
-      const { data } = supabase.storage
-        .from("tour_route_maps")
-        .getPublicUrl(fileName);
-
-      finalUrl = data.publicUrl;
-    }
-
-    // ❌ Nothing provided
-    else {
-      console.error("Provide either a file or a map URL");
-      setUploading(false);
-      return;
-    }
-
-    // ✅ Save to DB
-    const { error: dbError } = await supabase
+    const { error } = await supabase
       .from("tour_route_maps")
       .insert({
         tour_id: tourId,
-        map_url: finalUrl,
+        map_url: mapUrl.trim(),
       });
 
-    if (dbError) {
-      console.error("DB error:", dbError);
-      setUploading(false);
+    if (error) {
+      console.error(error);
+      setLoading(false);
       return;
     }
 
-    setUploading(false);
-    next(finalUrl);
+    setLoading(false);
+     router.push(`/tours/${tourId}/preview`);
   }
 
   return (
-    <div>
-      <h1>Step 6: Route (Map or File)</h1>
+    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl bg-white/5 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/10">
 
-      {/* 🔗 Map URL Input */}
-      <input
-        type="text"
-        placeholder="Paste Google Maps link"
-        value={mapUrl}
-        onChange={(e) => setMapUrl(e.target.value)}
-        className="input"
-      />
+        <h1 className="text-3xl font-bold mb-2">Create Tour</h1>
+        <p className="text-gray-400 mb-6">Step 6: Route Map</p>
 
-      <p className="text-sm text-gray-500">OR</p>
+        {/* Input */}
+        <div className="mb-4">
+          <label className="text-sm text-gray-300">
+            Google Maps Embed URL
+          </label>
 
-      {/* 📁 File Upload */}
-      <input
-        type="file"
-        accept="image/*,.gpx,.kml"
-        onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-      />
+          <input
+            type="text"
+            placeholder="Paste Google Maps embed link..."
+            value={mapUrl}
+            onChange={(e) => setMapUrl(e.target.value)}
+            className="w-full mt-2 p-3 rounded-lg bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+        </div>
 
-      <button
-        onClick={handleSave}
-        className="btn cursor-pointer"
-        disabled={uploading}
-      >
-        {uploading ? "Saving..." : "Next"}
-      </button>
+        {/* Helper */}
+        <p className="text-xs text-gray-500 mb-6">
+          Example: https://www.google.com/maps/embed?pb=...
+        </p>
+
+        {/* Preview (optional but powerful) */}
+        {mapUrl.includes("http") && (
+          <div className="mb-6 rounded-lg overflow-hidden border border-white/10">
+            <iframe
+              src={mapUrl}
+              className="w-full h-64"
+              loading="lazy"
+            ></iframe>
+          </div>
+        )}
+
+        {/* Button */}
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold cursor-pointer"
+        >
+          {loading ? "Saving..." : "Next Step"}
+        </button>
+
+      </div>
     </div>
   );
 }

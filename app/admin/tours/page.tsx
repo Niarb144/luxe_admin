@@ -35,11 +35,8 @@ export default async function ToursPage() {
         <h1 className="text-3xl font-bold">Tours Management</h1>
 
         <div className="space-x-4">
-          <Link href="/admin" className="text-amber-500 hover:underline">
-            Admin Home
-          </Link>
-
-          <Link href="/tours/create" className="text-amber-500 hover:underline">
+          
+          <Link href="/admin/tours/create" className="text-amber-500 hover:underline">
             + Create New Tour
           </Link>
         </div>
@@ -77,10 +74,10 @@ export default async function ToursPage() {
                   ${tour.price}
                 </td>
                 <td className="px-6 py-4">
-                  <Link href={`/tours/${tour.id}/edit`} className="text-amber-500 hover:underline">
+                  <Link href={`/admin/tours/${tour.id}/edit`} className="text-amber-500 hover:underline">
                     Edit
                   </Link>
-                  <Link href={`/tours/${tour.id}/preview`} className="ml-4 text-green-500 hover:underline">
+                  <Link href={`/admin/tours/${tour.id}/preview`} className="ml-4 text-green-500 hover:underline">
                     Preview
                   </Link>
                 </td>

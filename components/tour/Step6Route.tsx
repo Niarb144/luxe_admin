@@ -81,7 +81,7 @@ export default function Step6Route({ tourId, next }: any) {
           disabled={loading}
           className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold cursor-pointer"
         >
-          {loading ? "Saving..." : "Next Step"}
+          {loading ? "Saving..." : "Complete Tour"}
         </button>
 
       </div>

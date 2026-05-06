@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Step1Basic from "../../../components/tour/Step1Basic";
+import Step1Basic from "@/components/tour/Step1Basic";
 import Step2Inclusions from "@/components/tour/Step2Inclusions";
-import Step3Exclusions from "../../../components/tour/Step3Exclusions";
+import Step3Exclusions from "@/components/tour/Step3Exclusions";
 import Step4Itinerary from "@/components/tour/Step4Itinerary";
 import Step5Images from "@/components/tour/Step5Images";
 import Step6Route from "@/components/tour/Step6Route";

@@ -23,10 +23,10 @@ export default async function AdminPage() {
     .select("*", { count: "exact", head: true });
 
   const stats = [
-    { label: "Tours", value: toursCount ?? 0 , link: "/tours", addLink: "/tours/create" },
-    { label: "Bookings", value: bookingsCount ?? 0, link: "/bookings", addLink: "/bookings/create" },
-    { label: "Destinations", value: destinationsCount ?? 0, link: "/destinations", addLink: "/destinations/create" },
-    { label: "Blogs", value: blogsCount ?? 0, link: "/blogs", addLink: "/blogs/create" },
+    { label: "Tours", value: toursCount ?? 0 , link: "/admin/tours", addLink: "/admin/tours/create" },
+    { label: "Bookings", value: bookingsCount ?? 0, link: "/admin/bookings", addLink: "/admin/bookings/create" },
+    { label: "Destinations", value: destinationsCount ?? 0, link: "/admin/destinations", addLink: "/admin/destinations/create" },
+    { label: "Blogs", value: blogsCount ?? 0, link: "/admin/blogs", addLink: "/admin/blogs/create" },
   ];
 
   return (

@@ -117,7 +117,7 @@ export default async function TourPreviewPage({ params }: any) {
         Back to List
       </Link>
 
-      <Link href="/" className="inline-block ml-4 px-6 py-3 bg-gray-700 text-white font-semibold rounded-lg">
+      <Link href="/admin" className="inline-block ml-4 px-6 py-3 bg-gray-700 text-white font-semibold rounded-lg">
         Home
       </Link>
 

@@ -34,7 +34,7 @@ export default function Step6Route({ tourId, next }: any) {
     }
 
     setLoading(false);
-     router.push(`/tours/${tourId}/preview`);
+     router.push(`/admin/tours/${tourId}/preview`);
   }
 
   return (

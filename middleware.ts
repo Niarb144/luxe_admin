@@ -16,9 +16,9 @@ export async function middleware(req: any) {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!session && req.nextUrl.pathname.startsWith("/tours")) {
+  if (!user && req.nextUrl.pathname.startsWith("/tours")) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

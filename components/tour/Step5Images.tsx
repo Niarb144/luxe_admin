@@ -71,11 +71,11 @@ export default function Step5Images({ tourId, next }: any) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-3xl bg-white/5 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/10">
+    <div className="min-h-screen text-gray-800 flex items-center justify-center p-6">
+      <div className="w-full max-w-3xl bg-gray-400/5 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/10">
 
         <h1 className="text-3xl font-bold mb-2">Create Tour</h1>
-        <p className="text-gray-400 mb-6">Step 5: Upload Images</p>
+        <p className="text-gray-500 mb-6">Step 5: Upload Images</p>
 
         {/* Upload Box */}
         <div className="mb-6">

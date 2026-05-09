@@ -68,11 +68,11 @@ export default function Step2Inclusions({ tourId, next }: any) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black text-white flex items-center justify-center p-6">
+    <div className="min-h-screen text-gray-800 flex items-center justify-center p-6">
       <div className="w-full max-w-2xl bg-white/5 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/10">
 
         <h1 className="text-3xl font-bold mb-6">Create Tour</h1>
-        <p className="text-gray-400 mb-6">Step 2: Inclusions</p>
+        <p className="text-gray-500 mb-6">Step 2: Inclusions</p>
 
         {/* Tag Input */}
         <div className="mb-4">
@@ -110,7 +110,7 @@ export default function Step2Inclusions({ tourId, next }: any) {
               key={s}
               type="button"
               onClick={() => addItem(s)}
-              className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-sm"
+              className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-sm"
             >
               + {s}
             </button>

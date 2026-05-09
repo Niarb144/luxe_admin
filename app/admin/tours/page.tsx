@@ -5,15 +5,14 @@ export default async function ToursPage() {
   const supabase = await createClient();
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  console.log("SESSION:", session);
+  console.log("USER:", user);
 
-  // 🔒 Guard clause stays exactly as you had it
-  if (!session) {
+  if (!user) {
     return (
-      <div className="p-10 text-white bg-black min-h-screen">
+      <div className="p-0 text-gray-800 bg-white min-h-screen">
         <h1>Not logged in</h1>
       </div>
     );
@@ -29,7 +28,7 @@ export default async function ToursPage() {
     console.log("ERROR:", error);
 
   return (
-    <div className="p-10 bg-black min-h-screen text-white">
+    <div className="p-0 min-h-screen text-gray-800">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Tours Management</h1>

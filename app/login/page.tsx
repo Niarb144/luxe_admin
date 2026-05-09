@@ -28,8 +28,8 @@ export default function LoginPage() {
     router.push("/admin"); // ✅ keep loading during redirect
   }
 
-  const { data } = await supabase.auth.getSession();
-  console.log("SESSION:", data.session);
+  const { data } = await supabase.auth.getUser();
+  console.log("USER:", data.user);
 }
 
   return (

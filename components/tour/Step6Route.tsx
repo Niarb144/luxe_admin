@@ -2,13 +2,11 @@
 
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 
 export default function Step6Route({ tourId, next }: any) {
   const [mapUrl, setMapUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSave() {
     if (!tourId) return;
@@ -34,19 +32,19 @@ export default function Step6Route({ tourId, next }: any) {
     }
 
     setLoading(false);
-     router.push(`/admin/tours/${tourId}/preview`);
+    next();
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl bg-white/5 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/10">
+    <div className="min-h-screen text-gray-800 flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl bg-gray-400/5 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/10">
 
         <h1 className="text-3xl font-bold mb-2">Create Tour</h1>
-        <p className="text-gray-400 mb-6">Step 6: Route Map</p>
+        <p className="text-gray-500 mb-6">Step 6: Route Map</p>
 
         {/* Input */}
         <div className="mb-4">
-          <label className="text-sm text-gray-300">
+          <label className="text-sm text-gray-500">
             Google Maps Embed URL
           </label>
 

@@ -43,6 +43,11 @@ export default async function TourPreviewPage({ params }: any) {
     .eq("tour_id", id)
     .single();
 
+  const { data: faqs } = await supabase
+    .from("tour_faqs")
+    .select("*")
+    .eq("tour_id", id);
+
   const mainImage = images?.find((img) => img.is_main);
 
   return (
@@ -107,6 +112,18 @@ export default async function TourPreviewPage({ params }: any) {
             loading="lazy"
           />
         )}
+      </section>
+
+      {/* FAQs */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3">FAQs</h2>
+
+        {faqs?.map((faq) => (
+          <div key={faq.id} className="mb-4">
+            <h3 className="font-bold">{faq.question}</h3>
+            <p className="text-gray-400">{faq.answer}</p>
+          </div>
+        ))}
       </section>
 
       <Link href={`/admin/tours/${id}/edit`} className="inline-block px-6 py-3 bg-amber-500 text-black font-semibold rounded-lg">

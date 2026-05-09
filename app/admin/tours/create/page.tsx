@@ -8,6 +8,7 @@ import Step4Itinerary from "@/components/tour/Step4Itinerary";
 import Step5Images from "@/components/tour/Step5Images";
 import Step6Route from "@/components/tour/Step6Route";
 import StepFAQs from "@/components/tour/Step7FAQ";
+import Step8Highlights from "@/components/tour/Step8Highlights";
 
 import { supabase } from "@/lib/supabase";
 
@@ -72,20 +73,27 @@ export default function CreateTourPage() {
       )}
 
       {step === 5 && (
-        <Step5Images
+        <Step8Highlights
           tourId={tourId!}
           next={() => setStep(6)}
         />
       )}
 
       {step === 6 && (
-        <Step6Route
+        <Step5Images
           tourId={tourId!}
           next={() => setStep(7)}
         />
       )}
 
       {step === 7 && (
+        <Step6Route
+          tourId={tourId!}
+          next={() => setStep(8)}
+        />
+      )}
+
+      {step === 8 && (
         <StepFAQs
           tourId={tourId!}
           faqs={formData.faqs}

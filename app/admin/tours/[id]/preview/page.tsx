@@ -30,6 +30,12 @@ export default async function TourPreviewPage({ params }: any) {
     .eq("tour_id", id)
     .order("day_number", { ascending: true });
 
+  const {data: highlights} = await supabase
+    .from("tour_highlights")
+    .select("*")
+    .eq("tour_id", id)
+    .order("created_at", { ascending: true });
+
   // Images
   const { data: images } = await supabase
     .from("tour_images")
@@ -99,6 +105,22 @@ export default async function TourPreviewPage({ params }: any) {
             </p>
           </div>
         ))}
+      </section>
+
+      {/* Tour Highlights */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3">Highlights</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {highlights?.map((highlight) => (
+            <div key={highlight.id} className="bg-gray-800 p-4 rounded-xl">
+              <div className="flex items-center mb-2">
+                <span className="text-2xl mr-2">{highlight.icon}</span>
+                <h3 className="font-bold">{highlight.title}</h3>
+              </div>
+              <p className="text-gray-400">{highlight.description}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Route Map */}

@@ -3,8 +3,9 @@ import { supabase } from "@/lib/supabase";
 export default async function DestinationPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const { data: destination } = await supabase
     .from("destinations")
     .select(`
@@ -13,13 +14,13 @@ export default async function DestinationPage({
       destination_facts (*),
       destination_highlights (*)
     `)
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
   if (!destination) return null;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 bg-black">
       {/* Hero */}
       <div className="relative h-[500px]">
         <img

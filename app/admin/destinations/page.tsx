@@ -1,11 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
-export default async function DestinationsPage({
-     params,
-}: {
-  params: { slug: string };
-}) {
+export default async function DestinationsPage() {
   const { data: destinations } = await supabase
     .from("destinations")
     .select(`

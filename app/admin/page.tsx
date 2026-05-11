@@ -65,14 +65,14 @@ export default async function AdminPage() {
       </div>
 
       {/* Optional future section */}
-      <div className="mt-10 bg-white rounded-xl shadow p-6">
+      {/* <div className="mt-10 bg-white rounded-xl shadow p-6">
         <h2 className="text-lg font-semibold text-gray-800">
           Recent Activity
         </h2>
         <p className="text-gray-500 mt-2">
           (You can later add recent bookings, new tours, etc.)
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }

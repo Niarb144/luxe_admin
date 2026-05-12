@@ -14,7 +14,20 @@ export default function DestinationForm() {
 
   const [facts, setFacts] = useState([""]);
   const [highlights, setHighlights] = useState([""]);
-  const [images, setImages] = useState([""]);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const files = Array.from(e.target.files || []);
+
+  setImages(files);
+
+  const previews = files.map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    setImagePreviews(previews);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,15 +58,36 @@ export default function DestinationForm() {
 
     // 2. Save images
     if (images.length > 0) {
-      await supabase.from("destination_images").insert(
-        images
-          .filter((img) => img.trim() !== "")
-          .map((img) => ({
-            destination_id: destination.id,
-            image_url: img,
-          }))
-      );
+    const uploadedImages = [];
+
+    for (const image of images) {
+      const fileName = `${Date.now()}-${image.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("destination-images")
+        .upload(fileName, image);
+
+      if (uploadError) {
+        console.error(uploadError);
+        continue;
+      }
+
+      const { data } = supabase.storage
+        .from("destination-images")
+        .getPublicUrl(fileName);
+
+      uploadedImages.push({
+        destination_id: destination.id,
+        image_url: data.publicUrl,
+      });
     }
+
+    if (uploadedImages.length > 0) {
+      await supabase
+        .from("destination_images")
+        .insert(uploadedImages);
+    }
+  }
 
     // 3. Save facts
     if (facts.length > 0) {
@@ -174,29 +208,34 @@ export default function DestinationForm() {
 
       {/* Images */}
       <div>
-        <h3 className="font-semibold mb-2">Images</h3>
+        <h3 className="font-semibold mb-4 text-gray-800">
+          Destination Images
+        </h3>
 
-        {images.map((image, index) => (
-          <input
-            key={index}
-            value={image}
-            onChange={(e) => {
-              const updated = [...images];
-              updated[index] = e.target.value;
-              setImages(updated);
-            }}
-            className="w-full border p-3 rounded-xl mb-2 text-gray-800 text-lg font-semibold"
-            placeholder="Image URL"
-          />
-        ))}
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleImageChange}
+          className="w-full border p-3 rounded-xl mb-4 text-gray-800 text-lg font-semibold"
+        />
 
-        <button
-          type="button"
-          onClick={() => setImages([...images, ""])}
-          className="px-4 py-2 bg-black text-white rounded-xl cursor-pointer"
-        >
-          Add Image
-        </button>
+        {imagePreviews.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {imagePreviews.map((preview, index) => (
+              <div
+                key={index}
+                className="relative overflow-hidden rounded-2xl border"
+              >
+                <img
+                  src={preview}
+                  alt=""
+                  className="w-full h-40 object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <button

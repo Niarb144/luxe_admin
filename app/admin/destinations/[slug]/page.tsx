@@ -9,23 +9,47 @@ export default async function DestinationPage({
   const { slug } = await params;
   const { data: destination } = await supabase
     .from("destinations")
-    .select(`
-      *,
-      destination_images (*),
-      destination_facts (*),
-      destination_highlights (*)
-    `)
+    .select(`*`)
     .eq("slug", slug)
     .single();
 
   if (!destination) return null;
+
+  const destinationId = destination.id;
+
+  const {data: facts} = await supabase
+    .from("destination_facts")
+    .select("*")
+    .eq("destination_id", destinationId);
+
+  const {data: highlight} = await supabase
+    .from("destination_highlights")
+    .select("*")
+    .eq("destination_id", destinationId);
+
+  const {data: images} = await supabase 
+    .from("destination_images")
+    .select("*")
+    .eq("destination_id", destinationId);
+
+  const { data: allFacts } = await supabase
+  .from("destination_facts")
+  .select("*");
+
+  // console.log("ALL FACTS:", allFacts);
+
+  // console.log("DESTINATION:", destination);
+  // console.log("DESTINATION ID:", destinationId);
+  // console.log("FACTS:", facts);
+  // console.log("HIGHLIGHTS:", highlight);
+  // console.log("IMAGES:", images);
 
   return (
     <div className="space-y-10 bg-black">
       {/* Hero */}
       <div className="relative h-[500px]">
         <img
-          src={destination.destination_images?.[0]?.image_url}
+          src={images?.[0]?.image_url}
           className="w-full h-full object-cover"
         />
 
@@ -56,12 +80,12 @@ export default async function DestinationPage({
         </h2>
 
         <div className="grid md:grid-cols-2 gap-4">
-          {destination.destination_highlights.map((item: any) => (
+          {highlight?.map((item: any) => (
             <div
-              key={item.id}
+              key={item?.id}
               className="p-5 border rounded-2xl"
             >
-              {item.highlight}
+              {item?.highlight}
             </div>
           ))}
         </div>
@@ -74,12 +98,12 @@ export default async function DestinationPage({
         </h2>
 
         <div className="space-y-3">
-          {destination.destination_facts.map((fact: any) => (
+          {facts?.map((fact: any) => (
             <div
-              key={fact.id}
-              className="p-4 bg-gray-100 rounded-xl"
+              key={fact?.id}
+              className="p-4 bg-white rounded-xl text-gray-800 font-semibold"
             >
-              {fact.fact}
+              {fact?.fact}
             </div>
           ))}
         </div>

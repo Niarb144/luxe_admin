@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import Link from "next/dist/client/link";
 
 export default async function DestinationPage({
   params,
@@ -92,6 +93,10 @@ export default async function DestinationPage({
           loading="lazy"
         />
       </section>
+
+      <Link href="/admin/destinations" className="inline-block px-6 py-3 bg-gray-700 text-white font-semibold rounded-lg">
+        Back to List
+      </Link>
     </div>
   );
 }

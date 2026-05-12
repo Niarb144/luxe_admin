@@ -21,7 +21,7 @@ export default async function ToursPage() {
   // 📦 Fetch tours AFTER auth check
   const { data: tours, error } = await supabase
     .from("tours")
-    .select("id, title, duration, location, price")
+    .select("id, slug, title, duration, location, price")
     .order("created_at", { ascending: false });
 
     console.log("TOURS:", tours);
@@ -76,7 +76,7 @@ export default async function ToursPage() {
                   <Link href={`/admin/tours/${tour.id}/edit`} className="text-amber-500 hover:underline">
                     Edit
                   </Link>
-                  <Link href={`/admin/tours/${tour.id}/preview`} className="ml-4 text-green-500 hover:underline">
+                  <Link href={`/admin/tours/${tour.slug}/preview`} className="ml-4 text-green-500 hover:underline">
                     Preview
                   </Link>
                 </td>

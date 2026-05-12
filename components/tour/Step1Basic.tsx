@@ -2,6 +2,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
+import slugify from "slugify";
 
 export default function Step1Basic({ next }: any) {
   const [loading, setLoading] = useState(false);
@@ -12,17 +13,36 @@ export default function Step1Basic({ next }: any) {
 
     const form = new FormData(e.target);
 
-    const { data: userData } = await supabase.auth.getUser();
-    console.log("USER:", userData.user);
+    const title = form.get("title") as string;
+
+    // Generate slug
+    const slug = slugify(title, {
+      lower: true,
+      strict: true,
+    });
 
     const payload = {
-      title: form.get("title"),
+      title,
+      slug,
       description: form.get("description"),
       duration: form.get("duration"),
       location: form.get("location"),
       price: Number(form.get("price")),
-      main_image: form.get("main_image") || undefined, // fallback to DB default
+      main_image: form.get("main_image") || undefined,
     };
+
+    // Check if slug already exists
+    const { data: existingTour } = await supabase
+      .from("tours")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (existingTour) {
+      alert("A tour with this title already exists.");
+      setLoading(false);
+      return;
+    }
 
     const { data, error } = await supabase
       .from("tours")
@@ -39,14 +59,18 @@ export default function Step1Basic({ next }: any) {
     console.log("NEW TOUR:", data);
 
     setLoading(false);
+
     next(form, data.id);
   }
 
   return (
-    <div className="min-h-screen  text-gray-800 flex items-center justify-center p-6">
+    <div className="min-h-screen text-gray-800 flex items-center justify-center p-6">
       <div className="w-full max-w-2xl bg-white/5 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/10">
-        
-        <h1 className="text-3xl font-bold mb-6">Create Tour</h1>
+
+        <h1 className="text-3xl font-bold mb-6">
+          Create Tour
+        </h1>
+
         <p className="text-gray-400 mb-8">
           Step 1: Basic Information
         </p>
@@ -55,7 +79,10 @@ export default function Step1Basic({ next }: any) {
 
           {/* Title */}
           <div>
-            <label className="block mb-2 text-sm text-gray-500">Title</label>
+            <label className="block mb-2 text-sm text-gray-500">
+              Title
+            </label>
+
             <input
               name="title"
               required
@@ -66,7 +93,10 @@ export default function Step1Basic({ next }: any) {
 
           {/* Description */}
           <div>
-            <label className="block mb-2 text-sm text-gray-500">Description</label>
+            <label className="block mb-2 text-sm text-gray-500">
+              Description
+            </label>
+
             <textarea
               name="description"
               rows={4}
@@ -77,8 +107,12 @@ export default function Step1Basic({ next }: any) {
 
           {/* Duration + Location */}
           <div className="grid grid-cols-2 gap-4">
+
             <div>
-              <label className="block mb-2 text-sm text-gray-500">Duration</label>
+              <label className="block mb-2 text-sm text-gray-500">
+                Duration
+              </label>
+
               <input
                 name="duration"
                 placeholder="e.g. 3 Days"
@@ -87,18 +121,25 @@ export default function Step1Basic({ next }: any) {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm text-gray-500">Location</label>
+              <label className="block mb-2 text-sm text-gray-500">
+                Location
+              </label>
+
               <input
                 name="location"
                 placeholder="e.g. Kenya"
                 className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
               />
             </div>
+
           </div>
 
           {/* Price */}
           <div>
-            <label className="block mb-2 text-sm text-gray-500">Price (USD)</label>
+            <label className="block mb-2 text-sm text-gray-500">
+              Price (USD)
+            </label>
+
             <input
               name="price"
               type="number"
@@ -107,7 +148,7 @@ export default function Step1Basic({ next }: any) {
             />
           </div>
 
-          {/* Button */}
+          {/* Submit */}
           <button
             disabled={loading}
             className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer"

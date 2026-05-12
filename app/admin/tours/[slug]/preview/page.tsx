@@ -1,64 +1,80 @@
 import { supabase } from "@/lib/supabase";
-import Link from "next/dist/client/link";
+import Link from "next/link";
 
-export default async function TourPreviewPage({ params }: any) {
-  const { id } = await params;
+export default async function TourPreviewPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
-  // Tour
+  // Get tour using slug
   const { data: tour } = await supabase
     .from("tours")
     .select("*")
-    .eq("id", id)
+    .eq("slug", slug)
     .single();
+
+  if (!tour) {
+    return (
+      <div className="text-white p-10">
+        Tour not found
+      </div>
+    );
+  }
+
+  // Now use the actual tour id for related tables
+  const tourId = tour.id;
 
   // Inclusions
   const { data: inclusions } = await supabase
     .from("tour_inclusions")
     .select("*")
-    .eq("tour_id", id);
+    .eq("tour_id", tourId);
 
   // Exclusions
   const { data: exclusions } = await supabase
     .from("tour_exclusions")
     .select("*")
-    .eq("tour_id", id);
+    .eq("tour_id", tourId);
 
   // Itinerary
   const { data: itinerary } = await supabase
     .from("tour_itinerary")
     .select("*")
-    .eq("tour_id", id)
+    .eq("tour_id", tourId)
     .order("day_number", { ascending: true });
 
-  const {data: highlights} = await supabase
+  // Highlights
+  const { data: highlights } = await supabase
     .from("tour_highlights")
     .select("*")
-    .eq("tour_id", id)
+    .eq("tour_id", tourId)
     .order("created_at", { ascending: true });
 
   // Images
   const { data: images } = await supabase
     .from("tour_images")
     .select("*")
-    .eq("tour_id", id);
+    .eq("tour_id", tourId);
 
   // Route
   const { data: route } = await supabase
     .from("tour_route_maps")
     .select("*")
-    .eq("tour_id", id)
+    .eq("tour_id", tourId)
     .single();
 
+  // FAQs
   const { data: faqs } = await supabase
     .from("tour_faqs")
     .select("*")
-    .eq("tour_id", id);
+    .eq("tour_id", tourId);
 
   const mainImage = images?.find((img) => img.is_main);
 
   return (
     <div className="min-h-screen bg-black text-white p-10">
-
       {/* Hero */}
       <div className="mb-10">
         <img
@@ -114,7 +130,7 @@ export default async function TourPreviewPage({ params }: any) {
           {highlights?.map((highlight) => (
             <div key={highlight.id} className="bg-gray-800 p-4 rounded-xl">
               <div className="flex items-center mb-2">
-                <span className="text-2xl mr-2">{highlight.icon}</span>
+                {/* <span className="text-2xl mr-2">{highlight.icon}</span> */}
                 <h3 className="font-bold">{highlight.title}</h3>
               </div>
               <p className="text-gray-400">{highlight.description}</p>
@@ -148,7 +164,7 @@ export default async function TourPreviewPage({ params }: any) {
         ))}
       </section>
 
-      <Link href={`/admin/tours/${id}/edit`} className="inline-block px-6 py-3 bg-amber-500 text-black font-semibold rounded-lg">
+      <Link href={`/admin/tours/${slug}/edit`} className="inline-block px-6 py-3 bg-amber-500 text-black font-semibold rounded-lg">
         Edit Tour
       </Link>
 

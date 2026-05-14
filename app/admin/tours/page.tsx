@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
+import DeleteTour from "@/components/DeleteTour";
 
 export default async function ToursPage() {
   const supabase = await createClient();
@@ -76,6 +77,7 @@ export default async function ToursPage() {
                   <Link href={`/admin/tours/${tour.id}/edit`} className="text-amber-500 hover:underline">
                     Edit
                   </Link>
+                  <DeleteTour tour={tour} />
                   <Link href={`/admin/tours/${tour.slug}/preview`} className="ml-4 text-green-500 hover:underline">
                     Preview
                   </Link>

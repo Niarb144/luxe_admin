@@ -1,11 +1,30 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import slugify from "slugify";
 
 export default function Step1Basic({ next }: any) {
   const [loading, setLoading] = useState(false);
+  const [destinations, setDestinations] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadDestinations() {
+      const { data, error } = await supabase
+        .from("destinations")
+        .select("id,name,country")
+        .order("name");
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setDestinations(data || []);
+    }
+
+    loadDestinations();
+  }, []);
 
   async function handleSubmit(e: any) {
     e.preventDefault();
@@ -15,7 +34,6 @@ export default function Step1Basic({ next }: any) {
 
     const title = form.get("title") as string;
 
-    // Generate slug
     const slug = slugify(title, {
       lower: true,
       strict: true,
@@ -31,7 +49,11 @@ export default function Step1Basic({ next }: any) {
       main_image: form.get("main_image") || undefined,
     };
 
-    // Check if slug already exists
+    // get selected destinations
+    const selectedDestinations =
+      form.getAll("destinations");
+
+    // check slug exists
     const { data: existingTour } = await supabase
       .from("tours")
       .select("id")
@@ -44,7 +66,8 @@ export default function Step1Basic({ next }: any) {
       return;
     }
 
-    const { data, error } = await supabase
+    // create tour
+    const { data: tour, error } = await supabase
       .from("tours")
       .insert(payload)
       .select()
@@ -56,11 +79,30 @@ export default function Step1Basic({ next }: any) {
       return;
     }
 
-    console.log("NEW TOUR:", data);
+    // insert destination relations
+    if (selectedDestinations.length > 0) {
+      const relations = selectedDestinations.map(
+        (destinationId) => ({
+          tour_id: tour.id,
+          destination_id: destinationId,
+        })
+      );
+
+      const { error: relationError } =
+        await supabase
+          .from("tour_destinations")
+          .insert(relations);
+
+      if (relationError) {
+        console.error(relationError);
+      }
+    }
+
+    console.log("NEW TOUR:", tour);
 
     setLoading(false);
 
-    next(form, data.id);
+    next(form, tour.id);
   }
 
   return (
@@ -71,11 +113,14 @@ export default function Step1Basic({ next }: any) {
           Create Tour
         </h1>
 
-        <p className="text-gray-400 mb-8">
+        <p className="text-gray-600 mb-8">
           Step 1: Basic Information
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
 
           {/* Title */}
           <div>
@@ -87,7 +132,7 @@ export default function Step1Basic({ next }: any) {
               name="title"
               required
               placeholder="e.g. Maasai Mara Safari"
-              className="w-full p-3 rounded-lg bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
             />
           </div>
 
@@ -100,8 +145,7 @@ export default function Step1Basic({ next }: any) {
             <textarea
               name="description"
               rows={4}
-              placeholder="Describe the experience..."
-              className="w-full p-3 rounded-lg bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
             />
           </div>
 
@@ -115,7 +159,7 @@ export default function Step1Basic({ next }: any) {
 
               <input
                 name="duration"
-                placeholder="e.g. 3 Days"
+                placeholder="3 Days"
                 className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
               />
             </div>
@@ -127,7 +171,7 @@ export default function Step1Basic({ next }: any) {
 
               <input
                 name="location"
-                placeholder="e.g. Kenya"
+                placeholder="Kenya"
                 className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
               />
             </div>
@@ -141,14 +185,47 @@ export default function Step1Basic({ next }: any) {
             </label>
 
             <input
-              name="price"
               type="number"
-              placeholder="e.g. 1200"
+              name="price"
               className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
             />
           </div>
 
-          {/* Submit */}
+          {/* Destinations */}
+          <div>
+            <label className="block mb-4 text-sm text-gray-500">
+              Destinations
+            </label>
+
+            <div className="grid grid-cols-2 gap-3 max-h-56 overflow-y-auto p-2 rounded-xl bg-black/20">
+
+              {destinations.map((destination) => (
+                <label
+                  key={destination.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-black/30 hover:bg-black/50 cursor-pointer transition"
+                >
+                  <input
+                    type="checkbox"
+                    name="destinations"
+                    value={destination.id}
+                    className="accent-amber-500"
+                  />
+
+                  <div>
+                    <p className="font-medium">
+                      {destination.name}
+                    </p>
+
+                    <p className="text-xs text-gray-400">
+                      {destination.country}
+                    </p>
+                  </div>
+                </label>
+              ))}
+
+            </div>
+          </div>
+
           <button
             disabled={loading}
             className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer"

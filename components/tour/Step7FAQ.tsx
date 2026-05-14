@@ -8,6 +8,7 @@ export default function Step7FAQs({
   tourId,
   faqs,
   setFaqs,
+  slug,
 }: any) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -67,7 +68,7 @@ export default function Step7FAQs({
       return;
     }
 
-    router.push(`/admin/tours/${tourId}/preview`);
+    router.push(`/admin/tours/${slug}/preview`);
   }
 
   return (

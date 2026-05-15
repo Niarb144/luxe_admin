@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import DeleteDestination from "@/components/DeleteDestination";
 
 export default async function DestinationsPage() {
   const { data: destinations } = await supabase
@@ -40,6 +41,7 @@ export default async function DestinationsPage() {
             <p className="text-gray-500">
               {destination.country}
             </p>
+            <DeleteDestination destination={destination} />
           </div>
         </Link>
       ))}

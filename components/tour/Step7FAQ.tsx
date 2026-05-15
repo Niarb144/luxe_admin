@@ -68,7 +68,7 @@ export default function Step7FAQs({
       return;
     }
 
-    router.push(`/admin/tours/${slug}/preview`);
+    router.push(`/admin/tours/`);
   }
 
   return (

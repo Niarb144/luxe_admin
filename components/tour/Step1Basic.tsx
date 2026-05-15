@@ -7,23 +7,28 @@ import slugify from "slugify";
 export default function Step1Basic({ next }: any) {
   const [loading, setLoading] = useState(false);
   const [destinations, setDestinations] = useState<any[]>([]);
+  const [holidayTypes, setHolidayTypes] = useState<any[]>([]);
 
   useEffect(() => {
-    async function loadDestinations() {
-      const { data, error } = await supabase
-        .from("destinations")
-        .select("id,name,country")
-        .order("name");
+    async function loadData() {
 
-      if (error) {
-        console.error(error);
-        return;
-      }
+      const { data: destinationData } =
+        await supabase
+          .from("destinations")
+          .select("id,name,country")
+          .order("name");
 
-      setDestinations(data || []);
+      const { data: typeData } =
+        await supabase
+          .from("holiday_types")
+          .select("*")
+          .order("name");
+
+      setDestinations(destinationData || []);
+      setHolidayTypes(typeData || []);
     }
 
-    loadDestinations();
+    loadData();
   }, []);
 
   async function handleSubmit(e: any) {
@@ -52,6 +57,10 @@ export default function Step1Basic({ next }: any) {
     // get selected destinations
     const selectedDestinations =
       form.getAll("destinations");
+
+    // Get selected holiday types
+    const selectedHolidayTypes =
+      form.getAll("holiday_types");
 
     // check slug exists
     const { data: existingTour } = await supabase
@@ -96,6 +105,26 @@ export default function Step1Basic({ next }: any) {
       if (relationError) {
         console.error(relationError);
       }
+    }
+
+    // insert holiday type relations
+    if (selectedHolidayTypes.length > 0) {
+
+      const relations =
+        selectedHolidayTypes.map(
+          (typeId) => ({
+            tour_id: tour.id,
+            holiday_type_id: typeId,
+          })
+        );
+
+      const { error } =
+        await supabase
+          .from("tour_holiday_types")
+          .insert(relations);
+
+      if (error)
+        console.error(error);
     }
 
     console.log("NEW TOUR:", tour);
@@ -224,6 +253,38 @@ export default function Step1Basic({ next }: any) {
               ))}
 
             </div>
+          </div>
+
+          {/* Holiday Types */}
+          <div>
+            <label className="block mb-4 text-sm text-gray-500">
+              Holiday Types
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              {holidayTypes.map((type) => (
+
+              <label
+                key={type.id}
+                className="flex items-center gap-3
+                p-3 rounded-lg bg-black/30
+                cursor-pointer hover:bg-black/50"
+              >
+
+              <input
+                type="checkbox"
+                name="holiday_types"
+                value={type.id}
+                className="accent-amber-500"
+              />
+
+              <span>{type.name}</span>
+
+              </label>
+
+              ))}
+
+              </div>
           </div>
 
           <button

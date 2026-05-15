@@ -1,23 +1,23 @@
 "use client";
 import { supabase } from "@/lib/supabase";
 
-export default function DeleteTour({ tour }: { tour: { id: string } }) {
+export default function DeleteDestination({ destination }: { destination: { id: string } }) {
 
-async function deleteTour(id: string) {
+async function deleteDestination(id: string) {
   const confirmed = window.confirm(
-    "Delete this tour?"
+    "Delete this destination?"
   );
 
   if (!confirmed) return;
 
   const { error } = await supabase
-    .from("tours")
+    .from("destinations")
     .delete()
     .eq("id", id);
 
   if (error) {
     console.error(error);
-    alert("Failed to delete tour");
+    alert("Failed to delete destination");
     return;
   }
 
@@ -27,7 +27,7 @@ async function deleteTour(id: string) {
 
 return(
     <button
-        onClick={() => deleteTour(tour.id)}
+        onClick={() => deleteDestination(destination.id)}
         className="ml-4 text-red-500 hover:underline cursor-pointer"
         >
         Delete

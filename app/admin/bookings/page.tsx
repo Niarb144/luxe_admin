@@ -94,7 +94,7 @@ export default function AdminBookingsPage() {
                 d.toDateString() === date.toDateString()
             );
 
-            return isBooked ? "bg-green-400 rounded-full text-white" : "text-gray-600";
+            return isBooked ? "bg-green-400 rounded-full text-green-400" : "text-gray-600";
           }}
         />
       </div>

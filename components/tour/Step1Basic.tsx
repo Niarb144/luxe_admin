@@ -52,6 +52,7 @@ export default function Step1Basic({ next }: any) {
       location: form.get("location"),
       price: Number(form.get("price")),
       main_image: form.get("main_image") || undefined,
+      why_choose_safari: form.get("why_choose_safari"),
     };
 
     // get selected destinations
@@ -285,6 +286,19 @@ export default function Step1Basic({ next }: any) {
               ))}
 
               </div>
+          </div>
+
+          {/* Why Choose Safari */}
+          <div>
+            <label className="block mb-2 text-sm text-gray-500">
+              Why Choose Safari
+            </label>
+
+            <textarea
+              name="why_choose_safari"
+              rows={4}
+              className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
+            />
           </div>
 
           <button

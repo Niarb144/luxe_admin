@@ -152,6 +152,14 @@ export default async function TourPreviewPage({
         )}
       </section>
 
+      {/* Why Choose Safari */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3">Why Choose Safari</h2>
+        <p className="text-gray-400">
+          {tour.why_choose_safari || "No description provided."}
+        </p>
+      </section>
+
       {/* FAQs */}
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-3">FAQs</h2>

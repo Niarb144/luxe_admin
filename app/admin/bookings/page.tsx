@@ -78,13 +78,14 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Bookings Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-800">Bookings Dashboard</h1>
 
       {/* CALENDAR */}
       <div className="bg-white p-4 rounded shadow">
-        <h2 className="font-semibold mb-2">Booked Dates</h2>
+        <h2 className="font-semibold mb-2 text-gray-800">Booked Dates</h2>
 
         <Calendar
+        className="text-gray-800"
           onChange={(value) => setSelectedDate(value as Date)}
           value={selectedDate}
           tileClassName={({ date }) => {
@@ -93,7 +94,7 @@ export default function AdminBookingsPage() {
                 d.toDateString() === date.toDateString()
             );
 
-            return isBooked ? "bg-red-200 rounded-full" : "";
+            return isBooked ? "bg-green-400 rounded-full text-white" : "text-gray-600";
           }}
         />
       </div>
@@ -103,24 +104,24 @@ export default function AdminBookingsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b">
-              <th>Safari</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th className="text-gray-800">Safari</th>
+              <th className="text-gray-800">Name</th>
+              <th className="text-gray-800">Email</th>
+              <th className="text-gray-800">Phone</th>
+              <th className="text-gray-800">Date</th>
+              <th className="text-gray-800">Status</th>
+              <th className="text-gray-800">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {bookings.map((b) => (
               <tr key={b.id} className="border-b">
-                <td>{b.tour_name}</td>
-                <td>{b.full_name}</td>
-                <td>{b.email}</td>
-                <td>{b.phone}</td>
-                <td>{b.travel_date}</td>
+                <td className="text-gray-600">{b.tour_name}</td>
+                <td className="text-gray-600">{b.full_name}</td>
+                <td className="text-gray-600">{b.email}</td>
+                <td className="text-gray-600">{b.phone}</td>
+                <td className="text-gray-600">{b.travel_date}</td>
                 <td>
                   <span
                     className={
@@ -138,21 +139,21 @@ export default function AdminBookingsPage() {
                 <td className="space-x-2">
                   <button
                     onClick={() => updateStatus(b.id, "confirmed")}
-                    className="text-green-600"
+                    className="text-green-600 cursor-pointer"
                   >
                     Approve
                   </button>
 
                   <button
                     onClick={() => updateStatus(b.id, "cancelled")}
-                    className="text-orange-600"
+                    className="text-orange-600 cursor-pointer"
                   >
                     Cancel
                   </button>
 
                   <button
                     onClick={() => deleteBooking(b.id)}
-                    className="text-red-600"
+                    className="text-red-600 cursor-pointer"
                   >
                     Delete
                   </button>

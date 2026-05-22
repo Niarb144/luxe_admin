@@ -122,6 +122,7 @@ No Images
 <h2 className="
 text-2xl
 font-bold
+text-gray-800
 ">
 
 {hotel.hotel_name}
@@ -165,101 +166,6 @@ hotel.classification==="Luxury"
 
 </span>
 
-
-
-<p className="
-text-gray-700
-mb-5
-">
-
-{hotel.description}
-
-</p>
-
-
-
-{/* AMENITIES */}
-
-<div className="mb-5">
-
-<h3 className="
-font-semibold
-mb-2
-">
-
-Amenities
-
-</h3>
-
-<div className="
-flex
-flex-wrap
-gap-2
-">
-
-{hotel.amenities?.length ? (
-
-hotel.amenities.map(
-(amenity:string)=>(
-<span
-
-key={amenity}
-
-className="
-px-3
-py-1
-bg-amber-100
-text-amber-700
-rounded-full
-text-sm
-"
-
->
-
-{amenity}
-
-</span>
-))
-
-) : (
-
-<p>No amenities listed</p>
-
-)}
-
-</div>
-
-</div>
-
-
-
-{/* MAP */}
-
-{hotel.map_url && (
-
-<a
-
-href={hotel.map_url}
-
-target="_blank"
-
-className="
-inline-block
-px-4
-py-2
-bg-black
-text-white
-rounded-lg
-hover:bg-gray-800
-"
-
->
-
-View Location
-
-</a>
-
-)}
 
 </div>
 

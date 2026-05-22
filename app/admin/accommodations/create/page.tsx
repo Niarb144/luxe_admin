@@ -47,7 +47,7 @@ export default function AddAccommodation() {
 
       const { error } =
         await supabase.storage
-          .from("accommodations")
+          .from("accommodation-images")
           .upload(filename, file);
 
       if (error) {

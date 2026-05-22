@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function AddAccommodation() {
@@ -8,6 +8,9 @@ export default function AddAccommodation() {
 
   const [amenities, setAmenities] = useState([""]);
   const [images, setImages] = useState<string[]>([]);
+  const [destinations, setDestinations] = useState<{ id: any; name: string }[]>([]);
+
+  const [selectedDestination, setSelectedDestination] = useState("");
 
   const [form, setForm] = useState({
     hotel_name: "",
@@ -16,6 +19,24 @@ export default function AddAccommodation() {
     map_url: "",
     classification: "Comfort",
   });
+
+  useEffect(()=>{
+
+    fetchDestinations();
+
+    },[]);
+
+
+    async function fetchDestinations(){
+
+    const {data} =
+    await supabase
+    .from("destinations")
+    .select("id,name");
+
+    setDestinations(data || []);
+
+    }
 
   async function uploadImages(files: FileList) {
     const uploadedUrls: string[] = [];
@@ -36,7 +57,7 @@ export default function AddAccommodation() {
 
       const { data } =
         supabase.storage
-          .from("accommodations-images")
+          .from("accommodation-images")
           .getPublicUrl(filename);
 
       uploadedUrls.push(
@@ -67,12 +88,17 @@ export default function AddAccommodation() {
       await supabase
         .from("accommodations")
         .insert([{
-          ...form,
 
-          amenities:
-            filteredAmenities,
+        ...form,
 
-          images
+        destination_id:
+        selectedDestination,
+
+        amenities:
+        filteredAmenities,
+
+        images
+
         }]);
 
     setLoading(false);
@@ -160,7 +186,52 @@ map_url:e.target.value
 className="border p-3 w-full text-gray-700"
 />
 
+<select
 
+value={selectedDestination}
+
+onChange={(e)=>
+setSelectedDestination(
+e.target.value
+)
+}
+
+className="
+border
+p-3
+w-full
+text-gray-700
+"
+
+>
+
+<option value="">
+
+Select Destination
+
+</option>
+
+
+{destinations.map(
+(destination:any)=>(
+
+<option
+
+key={destination.id}
+
+value={destination.id}
+
+>
+
+{destination.name}
+
+</option>
+
+))
+
+}
+
+</select>
 
 <select
 

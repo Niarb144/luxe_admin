@@ -18,6 +18,10 @@ export default async function AdminPage() {
     .from("destinations")
     .select("*", { count: "exact", head: true });
 
+  const { count: accommodationsCount } = await supabase
+    .from("accommodations")
+    .select("*", { count: "exact", head: true });
+
   const { count: blogsCount } = await supabase
     .from("blogs")
     .select("*", { count: "exact", head: true });
@@ -26,6 +30,7 @@ export default async function AdminPage() {
     { label: "Tours", value: toursCount ?? 0 , link: "/admin/tours", addLink: "/admin/tours/create" },
     { label: "Bookings", value: bookingsCount ?? 0, link: "/admin/bookings", addLink: "/admin/bookings/create" },
     { label: "Destinations", value: destinationsCount ?? 0, link: "/admin/destinations", addLink: "/admin/destinations/create" },
+    { label: "Accommodations", value: accommodationsCount ?? 0, link: "/admin/accommodations", addLink: "/admin/accommodations/create" },
     { label: "Blogs", value: blogsCount ?? 0, link: "/admin/blogs", addLink: "/admin/blogs/create" },
   ];
 

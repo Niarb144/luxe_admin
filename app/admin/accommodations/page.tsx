@@ -43,7 +43,13 @@ gap-8
 
 {data?.map((hotel)=>(
 
-<div
+<Link href={`/admin/accommodations/${hotel.id}`}
+
+key={hotel.id}
+
+className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+>
+    <div
 
 key={hotel.id}
 
@@ -170,6 +176,8 @@ hotel.classification==="Luxury"
 </div>
 
 </div>
+
+</Link>
 
 ))}
 

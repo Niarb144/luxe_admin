@@ -5,11 +5,13 @@ import { supabase } from "@/lib/supabase";
 
 export default function AddAccommodation() {
   const [loading, setLoading] = useState(false);
-
   const [amenities, setAmenities] = useState([""]);
-  const [images, setImages] = useState<string[]>([]);
-  const [destinations, setDestinations] = useState<{ id: any; name: string }[]>([]);
+  const [imagesPreview, setImagesPreview] = useState<string[]>([]);
+  const [fileList, setFileList] = useState<FileList | null>(null);
 
+  const [destinations, setDestinations] = useState<
+    { id: any; name: string }[]
+  >([]);
   const [selectedDestination, setSelectedDestination] = useState("");
 
   const [form, setForm] = useState({
@@ -20,473 +22,247 @@ export default function AddAccommodation() {
     classification: "Comfort",
   });
 
-  useEffect(()=>{
-
+  useEffect(() => {
     fetchDestinations();
+  }, []);
 
-    },[]);
-
-
-    async function fetchDestinations(){
-
-    const {data} =
-    await supabase
-    .from("destinations")
-    .select("id,name");
-
+  async function fetchDestinations() {
+    const { data } = await supabase.from("destinations").select("id,name");
     setDestinations(data || []);
+  }
 
-    }
-
-  async function uploadImages(files: FileList) {
+  // ✅ Upload images and return URLs
+  async function uploadImages(files: FileList): Promise<string[]> {
     const uploadedUrls: string[] = [];
 
     for (const file of Array.from(files)) {
-      const filename =
-        `${Date.now()}-${file.name}`;
+      const filename = `${Date.now()}-${file.name}`;
 
-      const { error } =
-        await supabase.storage
-          .from("accommodation-images")
-          .upload(filename, file);
+      const { error } = await supabase.storage
+        .from("accommodation-images")
+        .upload(filename, file);
 
       if (error) {
-        console.error(error);
+        console.error("Upload error:", error.message);
         continue;
       }
 
-      const { data } =
-        supabase.storage
-          .from("accommodation-images")
-          .getPublicUrl(filename);
+      const { data } = supabase.storage
+        .from("accommodation-images")
+        .getPublicUrl(filename);
 
-      uploadedUrls.push(
-        data.publicUrl
-      );
+      uploadedUrls.push(data.publicUrl);
     }
 
-    setImages(prev => [
-      ...prev,
-      ...uploadedUrls
-    ]);
+    return uploadedUrls;
   }
 
-  async function handleSubmit(
-    e: React.FormEvent
-  ) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     setLoading(true);
 
-    const filteredAmenities =
-      amenities.filter(
-        amenity =>
-          amenity.trim() !== ""
+    try {
+      const filteredAmenities = amenities.filter(
+        (a) => a.trim() !== ""
       );
 
-    const { error } =
-      await supabase
-        .from("accommodations")
-        .insert([{
+      // ✅ Upload images FIRST (no state dependency)
+      let uploadedImageUrls: string[] = [];
 
-        ...form,
+      if (fileList && fileList.length > 0) {
+        uploadedImageUrls = await uploadImages(fileList);
+      }
 
-        destination_id:
-        selectedDestination,
+      // ✅ Insert accommodation WITH images
+      const { error } = await supabase.from("accommodations").insert([
+        {
+          ...form,
+          destination_id: selectedDestination || null,
+          amenities: filteredAmenities,
+          images: uploadedImageUrls,
+        },
+      ]);
 
-        amenities:
-        filteredAmenities,
+      if (error) {
+        alert(error.message);
+        return;
+      }
 
-        images
+      alert("Accommodation added successfully!");
 
-        }]);
+      // Reset form
+      setForm({
+        hotel_name: "",
+        country_location: "",
+        description: "",
+        map_url: "",
+        classification: "Comfort",
+      });
 
-    setLoading(false);
+      setAmenities([""]);
+      setFileList(null);
+      setImagesPreview([]);
 
-    if (error) {
-      alert(error.message);
-      return;
+    } catch (err: any) {
+      console.error(err);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    alert("Accommodation added");
-
-    setForm({
-      hotel_name: "",
-      country_location: "",
-      description: "",
-      map_url: "",
-      classification: "Comfort",
-    });
-
-    setAmenities([""]);
-    setImages([]);
   }
 
   return (
-
-<form
-onSubmit={handleSubmit}
-className="space-y-5 max-w-2xl"
->
-
-<input
-placeholder="Hotel Name"
-value={form.hotel_name}
-onChange={(e)=>
-setForm({
-...form,
-hotel_name:e.target.value
-})
-}
-className="border p-3 w-full text-gray-700"
-/>
-
-
-<input
-placeholder="Country"
-value={form.country_location}
-onChange={(e)=>
-setForm({
-...form,
-country_location:e.target.value
-})
-}
-className="border p-3 w-full text-gray-700"
-/>
-
-
-<textarea
-placeholder="Description"
-
-value={form.description}
-
-onChange={(e)=>
-setForm({
-...form,
-description:e.target.value
-})
-}
-
-className="border p-3 w-full text-gray-700"
-/>
-
-
-<input
-placeholder="Google Maps URL"
-
-value={form.map_url}
-
-onChange={(e)=>
-setForm({
-...form,
-map_url:e.target.value
-})
-}
-
-className="border p-3 w-full text-gray-700"
-/>
-
-<select
-
-value={selectedDestination}
-
-onChange={(e)=>
-setSelectedDestination(
-e.target.value
-)
-}
-
-className="
-border
-p-3
-w-full
-text-gray-700
-"
-
->
-
-<option value="">
-
-Select Destination
-
-</option>
-
-
-{destinations.map(
-(destination:any)=>(
-
-<option
-
-key={destination.id}
-
-value={destination.id}
-
->
-
-{destination.name}
-
-</option>
-
-))
-
-}
-
-</select>
-
-<select
-
-value={form.classification}
-
-onChange={(e)=>
-setForm({
-...form,
-classification:
-e.target.value
-})
-}
-
-className="border p-3 w-full text-gray-700"
->
-
-<option>Economy</option>
-<option>Comfort</option>
-<option>Luxury</option>
-
-</select>
-
-
-
-{/* Amenities */}
-
-<div>
-
-<h3 className="font-semibold text-gray-700">
-
-Amenities
-
-</h3>
-
-
-{amenities.map(
-(amenity,index)=>(
-<div
-key={index}
-className="flex gap-2 mb-2"
->
-
-<input
-
-value={amenity}
-
-placeholder="Amenity"
-
-onChange={(e)=>{
-
-const updated =
-[...amenities];
-
-updated[index] =
-e.target.value;
-
-setAmenities(updated);
-
-}}
-
-className="border p-3 flex-1 text-gray-700"
-/>
-
-
-<button
-
-type="button"
-
-onClick={()=>
-
-setAmenities(
-
-amenities.filter(
-(_,i)=>
-i!==index
-)
-
-)
-
-}
-
-className="
-bg-red-500
-text-white
-px-4
-"
-
->
-
-Remove
-
-</button>
-
-</div>
-
-))}
-
-
-<button
-
-type="button"
-
-onClick={()=>
-
-setAmenities([
-...amenities,
-""
-])
-
-}
-
-className="
-bg-green-500
-text-white
-px-4
-py-2
-cursor-pointer
-"
-
->
-
-+ Add Amenity
-
-</button>
-
-</div>
-
-
-
-{/* Images */}
-
-<div>
-
-<h3 className="font-semibold text-gray-700">
-
-Upload Images
-
-</h3>
-
-<input
-
-type="file"
-
-multiple
-
-accept="image/*"
-
-onChange={(e)=>{
-
-if(
-e.target.files
-){
-
-uploadImages(
-e.target.files
-)
-
-}
-
-}}
-
-className="w-full text-gray-700"
-/>
-
-
-<div
-className="
-grid
-grid-cols-3
-gap-3
-mt-4
-"
->
-
-{images.map(
-(img,index)=>(
-
-<div
-key={index}
-className="relative"
->
-
-<img
-src={img}
-className="
-h-28
-w-full
-object-cover
-rounded
-"
-/>
-
-<button
-
-type="button"
-
-onClick={()=>{
-
-setImages(
-images.filter(
-(_,i)=>
-i!==index
-)
-)
-
-}}
-
-className="
-absolute
-top-1
-right-1
-bg-red-500
-text-white
-px-2
-"
-
->
-
-×
-
-</button>
-
-</div>
-
-))
-
-}
-
-</div>
-
-</div>
-
-
-
-<button
-
-disabled={loading}
-
-className="
-bg-black
-text-white
-px-6
-py-3
-cursor-pointer
-"
-
->
-
-{loading
-? "Saving..."
-: "Add Accommodation"}
-
-</button>
-
-</form>
-
+    <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl">
+      {/* Hotel Name */}
+      <input
+        placeholder="Hotel Name"
+        value={form.hotel_name}
+        onChange={(e) =>
+          setForm({ ...form, hotel_name: e.target.value })
+        }
+        className="border p-3 w-full text-gray-700"
+      />
+
+      {/* Country */}
+      <input
+        placeholder="Country"
+        value={form.country_location}
+        onChange={(e) =>
+          setForm({ ...form, country_location: e.target.value })
+        }
+        className="border p-3 w-full text-gray-700"
+      />
+
+      {/* Description */}
+      <textarea
+        placeholder="Description"
+        value={form.description}
+        onChange={(e) =>
+          setForm({ ...form, description: e.target.value })
+        }
+        className="border p-3 w-full text-gray-700"
+      />
+
+      {/* Map URL */}
+      <input
+        placeholder="Google Maps URL"
+        value={form.map_url}
+        onChange={(e) =>
+          setForm({ ...form, map_url: e.target.value })
+        }
+        className="border p-3 w-full text-gray-700"
+      />
+
+      {/* Destination */}
+      <select
+        value={selectedDestination}
+        onChange={(e) => setSelectedDestination(e.target.value)}
+        className="border p-3 w-full text-gray-700"
+      >
+        <option value="">Select Destination</option>
+        {destinations.map((d) => (
+          <option key={d.id} value={d.id}>
+            {d.name}
+          </option>
+        ))}
+      </select>
+
+      {/* Classification */}
+      <select
+        value={form.classification}
+        onChange={(e) =>
+          setForm({ ...form, classification: e.target.value })
+        }
+        className="border p-3 w-full text-gray-700"
+      >
+        <option>Economy</option>
+        <option>Comfort</option>
+        <option>Luxury</option>
+      </select>
+
+      {/* Amenities */}
+      <div>
+        <h3 className="font-semibold text-gray-700 mb-2">
+          Amenities
+        </h3>
+
+        {amenities.map((amenity, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <input
+              value={amenity}
+              placeholder="Amenity"
+              onChange={(e) => {
+                const updated = [...amenities];
+                updated[index] = e.target.value;
+                setAmenities(updated);
+              }}
+              className="border p-3 flex-1 text-gray-700"
+            />
+            <button
+              type="button"
+              onClick={() =>
+                setAmenities(amenities.filter((_, i) => i !== index))
+              }
+              className="bg-red-500 text-white px-4 cursor-pointer"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => setAmenities([...amenities, ""])}
+          className="bg-green-500 text-white px-4 py-2 mt-1 cursor-pointer"
+        >
+          + Add Amenity
+        </button>
+      </div>
+
+      {/* Images */}
+      <div>
+        <h3 className="font-semibold text-gray-700 mb-2">
+          Upload Images
+        </h3>
+
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={(e) => {
+            if (!e.target.files) return;
+
+            setFileList(e.target.files);
+
+            // Preview only (not DB source of truth)
+            const previews = Array.from(e.target.files).map((file) =>
+              URL.createObjectURL(file)
+            );
+
+            setImagesPreview(previews);
+          }}
+          className="w-full text-gray-700"
+        />
+
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          {imagesPreview.map((img, index) => (
+            <img
+              key={index}
+              src={img}
+              className="h-28 w-full object-cover rounded"
+              alt="preview"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Submit */}
+      <button
+        disabled={loading}
+        className="bg-black text-white px-6 py-3 cursor-pointer disabled:opacity-50"
+      >
+        {loading ? "Saving..." : "Add Accommodation"}
+      </button>
+    </form>
   );
 }

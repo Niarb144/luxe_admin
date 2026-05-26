@@ -1,190 +1,144 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import Image from "next/image";
+import DeleteAccommodation from "@/components/DeleteAccommodation";
 
 export default async function Hotels() {
+  const { data } = await supabase.from("accommodations").select("*");
 
-const { data } =
-await supabase
-.from("accommodations")
-.select("*");
+  return (
+    <div className="max-w-7xl mx-auto px-6 py-10">
 
-return (
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Accommodations</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {data?.length ?? 0} total {data?.length === 1 ? "property" : "properties"}
+          </p>
+        </div>
+        <Link
+          href="/admin/accommodations/create"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#b77e24] hover:bg-[#a06d1f] text-white font-semibold text-sm rounded-xl transition-colors shadow-sm"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Add Accommodation
+        </Link>
+      </div>
 
-<div className="max-w-7xl mx-auto px-6 py-10">
+      {/* Table */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-[#041f0e] text-left">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#b77e24]">
+                  Property
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#b77e24] hidden sm:table-cell">
+                  Location
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#b77e24] hidden md:table-cell">
+                  Classification
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#b77e24] hidden lg:table-cell">
+                  Images
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#b77e24] text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
 
-<Link
-href="/admin/accommodations/create"
+            <tbody className="divide-y divide-gray-100">
+              {data?.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-16 text-center text-gray-400">
+                    No accommodations found. Add one to get started.
+                  </td>
+                </tr>
+              )}
 
-className="
-inline-block
-mb-8
-px-5
-py-3
-bg-amber-500
-hover:bg-amber-600
-font-semibold
-rounded-lg
-"
->
+              {data?.map((hotel) => (
+                <tr key={hotel.id} className="hover:bg-amber-50/40 transition-colors duration-150 group">
 
-Add Accommodation
+                  {/* Property name */}
+                  <td className="px-6 py-4">
+                    <span className="font-semibold text-gray-900 group-hover:text-[#b77e24] transition-colors">
+                      {hotel.hotel_name}
+                    </span>
+                  </td>
 
-</Link>
+                  {/* Location */}
+                  <td className="px-6 py-4 text-gray-500 hidden sm:table-cell">
+                    {hotel.country_location || "—"}
+                  </td>
 
+                  {/* Classification badge */}
+                  <td className="px-6 py-4 hidden md:table-cell">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        hotel.classification === "Luxury"
+                          ? "bg-amber-100 text-amber-700"
+                          : hotel.classification === "Comfort"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {hotel.classification || "Unclassified"}
+                    </span>
+                  </td>
 
+                  {/* Image count */}
+                  <td className="px-6 py-4 hidden lg:table-cell">
+                    <span className="inline-flex items-center gap-1.5 text-gray-500">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                      {hotel.images?.length ?? 0} {hotel.images?.length === 1 ? "image" : "images"}
+                    </span>
+                  </td>
 
-<div className="
-grid
-md:grid-cols-2
-lg:grid-cols-3
-gap-8
-">
+                  {/* Actions */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
 
-{data?.map((hotel)=>(
+                      {/* View */}
+                      <Link
+                        href={`/admin/accommodations/${hotel.id}`}
+                        title="View public page"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-[#041f0e] hover:bg-gray-100 transition-colors duration-150"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </Link>
 
-<Link href={`/admin/accommodations/${hotel.id}`}
+                      {/* Edit */}
+                      <Link
+                        href={`/admin/accommodations/${hotel.id}`}
+                        title="Edit accommodation"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-[#b77e24] hover:bg-amber-50 transition-colors duration-150"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                        </svg>
+                      </Link>
 
-key={hotel.id}
+                      {/* Delete */}
+                      <DeleteAccommodation accommodation={{ id: hotel.id }} />
 
-className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
->
-    <div
+                    </div>
+                  </td>
 
-key={hotel.id}
-
-className="
-bg-white
-rounded-xl
-shadow-md
-overflow-hidden
-border
-"
-
->
-
-
-{/* IMAGE GALLERY */}
-
-<div className="
-flex
-overflow-x-auto
-gap-2
-p-2
-bg-gray-100
-">
-
-{hotel.images?.length ? (
-
-hotel.images.map(
-(img:string,index:number)=>(
-
-<Image
-
-key={index}
-
-src={img}
-
-alt={hotel.hotel_name}
-
-width={300}
-height={200}
-
-className="
-h-40
-w-60
-object-cover
-rounded
-flex-shrink-0
-"
-/>
-
-))
-
-) : (
-
-<div className="
-h-40
-w-full
-flex
-items-center
-justify-center
-bg-gray-200
-text-gray-500
-">
-
-No Images
-
-</div>
-
-)}
-
-</div>
-
-
-
-<div className="p-5">
-
-<h2 className="
-text-2xl
-font-bold
-text-gray-800
-">
-
-{hotel.hotel_name}
-
-</h2>
-
-
-<p className="
-text-gray-500
-mb-2
-">
-
-{hotel.country_location}
-
-</p>
-
-
-
-<span className={`
-inline-block
-px-3
-py-1
-rounded-full
-text-sm
-font-medium
-mb-4
-
-${
-hotel.classification==="Luxury"
-? "bg-yellow-100 text-yellow-700"
-
-: hotel.classification==="Comfort"
-? "bg-green-100 text-green-700"
-
-: "bg-gray-200 text-gray-700"
-
-}
-`}>
-
-{hotel.classification}
-
-</span>
-
-
-</div>
-
-</div>
-
-</Link>
-
-))}
-
-</div>
-
-</div>
-
-)
-
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }

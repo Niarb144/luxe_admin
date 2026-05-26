@@ -10,6 +10,7 @@ const navItems = [
   { name: "Accommodations", href: "/admin/accommodations" },
   { name: "Bookings", href: "/admin/bookings" },
   { name: "Blogs", href: "/admin/blogs" },
+  { name: "Countries", href: "/admin/countries" },
 ];
 
 export default function AdminSidebar({ email }: { email: string }) {

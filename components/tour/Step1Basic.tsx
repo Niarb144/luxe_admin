@@ -8,6 +8,7 @@ export default function Step1Basic({ next }: any) {
   const [loading, setLoading] = useState(false);
   const [destinations, setDestinations] = useState<any[]>([]);
   const [holidayTypes, setHolidayTypes] = useState<any[]>([]);
+  const [countries, setCountries] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -24,12 +25,20 @@ export default function Step1Basic({ next }: any) {
           .select("*")
           .order("name");
 
+      const { data: countryData } = await supabase
+        .from("countries")
+        .select("id,name")
+        .order("name");
+
+      setCountries(countryData || []);
       setDestinations(destinationData || []);
       setHolidayTypes(typeData || []);
     }
 
     loadData();
   }, []);
+
+  
 
   async function handleSubmit(e: any) {
     e.preventDefault();
@@ -49,11 +58,14 @@ export default function Step1Basic({ next }: any) {
       slug,
       description: form.get("description"),
       duration: form.get("duration"),
-      location: form.get("location"),
+      // location: form.get("location"),
       price: Number(form.get("price")),
       main_image: form.get("main_image") || undefined,
       why_choose_safari: form.get("why_choose_safari"),
     };
+
+    // get selected countries
+    const selectedCountries = form.getAll("countries");
 
     // get selected destinations
     const selectedDestinations =
@@ -87,6 +99,20 @@ export default function Step1Basic({ next }: any) {
       console.error(error);
       setLoading(false);
       return;
+    }
+
+    // insert country relations 
+    if (selectedCountries.length > 0) {
+      const relations = selectedCountries.map((countryId) => ({
+        tour_id: tour.id,
+        country_id: countryId,
+      }));
+
+      const { error } = await supabase
+        .from("tour_countries")
+        .insert(relations);
+
+      if (error) console.error(error);
     }
 
     // insert destination relations
@@ -194,16 +220,29 @@ export default function Step1Basic({ next }: any) {
               />
             </div>
 
+            {/* Countries */}
             <div>
-              <label className="block mb-2 text-sm text-gray-500">
-                Location
+              <label className="block mb-4 text-sm text-gray-500">
+                Countries
               </label>
 
-              <input
-                name="location"
-                placeholder="Kenya"
-                className="w-full p-3 rounded-lg bg-black/40 border border-white/10"
-              />
+              <div className="grid grid-cols-2 gap-3 max-h-56 overflow-y-auto p-2 rounded-xl bg-black/20">
+                {countries.map((country) => (
+                  <label
+                    key={country.id}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-black/30 hover:bg-black/50 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      name="countries"
+                      value={country.id}
+                      className="accent-amber-500"
+                    />
+
+                    <span>{country.name}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
           </div>

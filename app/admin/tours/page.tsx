@@ -22,7 +22,7 @@ export default async function ToursPage() {
   // 📦 Fetch tours AFTER auth check
   const { data: tours, error } = await supabase
     .from("tours")
-    .select("id, slug, title, duration, location, price")
+    .select("id, slug, title, duration, price")
     .order("created_at", { ascending: false });
 
     console.log("TOURS:", tours);
@@ -49,7 +49,6 @@ export default async function ToursPage() {
             <tr>
               <th className="px-6 py-3">Name</th>
               <th className="px-6 py-3">Days</th>
-              <th className="px-6 py-3">Location</th>
               <th className="px-6 py-3">Price</th>
               <th className="px-6 py-3">Actions</th>
             </tr>
@@ -66,9 +65,7 @@ export default async function ToursPage() {
                   {tour.duration} days
                 </td>
 
-                <td className="px-6 py-4 text-gray-900">
-                  {tour.location}
-                </td>
+                
 
                 <td className="px-6 py-4 font-bold text-gray-900">
                   ${tour.price}

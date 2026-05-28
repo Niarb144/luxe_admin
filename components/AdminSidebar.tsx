@@ -7,6 +7,7 @@ const navItems = [
   { name: "Dashboard", href: "/admin" },
   { name: "Tours", href: "/admin/tours" },
   { name: "Destinations", href: "/admin/destinations" },
+  { name: "Tour Pricing", href: "/admin/pricing" },
   { name: "Accommodations", href: "/admin/accommodations" },
   { name: "Bookings", href: "/admin/bookings" },
   { name: "Blogs", href: "/admin/blogs" },

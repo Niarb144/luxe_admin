@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-
+import { FaCrow, FaCrown } from "react-icons/fa";
+import { IoStarSharp, IoStarOutline } from "react-icons/io5";
+import { MdHotelClass } from "react-icons/md";
+import { FaC } from "react-icons/fa6";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Season = "LOW" | "MID" | "HIGH";
+type Classification = "economy" | "comfort" | "luxury" | "superior_luxury";
 
 interface Tour {
   id: string;
@@ -21,6 +25,20 @@ interface SeasonMeta {
   badge: string;
   text: string;
   accent: string;
+}
+
+interface ClassificationMeta {
+  key: Classification;
+  label: string;
+  icon: any;
+  description: string;
+  color: string;
+  activeBg: string;
+  activeText: string;
+  activeBorder: string;
+  inactiveBg: string;
+  inactiveBorder: string;
+  inactiveText: string;
 }
 
 interface PricingRow {
@@ -63,18 +81,78 @@ const SEASONS: SeasonMeta[] = [
   },
 ];
 
+// ─── Classification metadata ──────────────────────────────────────────────────
+const CLASSIFICATIONS: ClassificationMeta[] = [
+  {
+    key: "economy",
+    label: "Economy",
+    icon: <IoStarOutline />,
+    description: "Budget-friendly camps & lodges",
+    color: "#6b7280",
+    activeBg: "bg-[#f3f4f6]",
+    activeText: "text-[#374151]",
+    activeBorder: "border-[#6b7280]",
+    inactiveBg: "bg-white",
+    inactiveBorder: "border-[#e5e7eb]",
+    inactiveText: "text-[#9ca3af]",
+  },
+  {
+    key: "comfort",
+    label: "Comfort",
+    icon: <IoStarSharp />,
+    description: "Mid-range tented camps",
+    color: "#b8830a",
+    activeBg: "bg-[#fffbeb]",
+    activeText: "text-[#92400e]",
+    activeBorder: "border-[#b8830a]",
+    inactiveBg: "bg-white",
+    inactiveBorder: "border-[#e5e7eb]",
+    inactiveText: "text-[#9ca3af]",
+  },
+  {
+    key: "luxury",
+    label: "Luxury",
+    icon: <MdHotelClass />,
+    description: "Premium safari lodges",
+    color: "#7c3aed",
+    activeBg: "bg-[#f5f3ff]",
+    activeText: "text-[#5b21b6]",
+    activeBorder: "border-[#7c3aed]",
+    inactiveBg: "bg-white",
+    inactiveBorder: "border-[#e5e7eb]",
+    inactiveText: "text-[#9ca3af]",
+  },
+  {
+    key: "superior_luxury",
+    label: "Superior Luxury",
+    icon: <FaCrown />,
+    description: "Ultra-premium exclusive camps",
+    color: "#b45309",
+    activeBg: "bg-[#fef3c7]",
+    activeText: "text-[#78350f]",
+    activeBorder: "border-[#b45309]",
+    inactiveBg: "bg-white",
+    inactiveBorder: "border-[#e5e7eb]",
+    inactiveText: "text-[#9ca3af]",
+  },
+];
+
 const PERSONS = [2, 4, 6];
+
+// ─── Helper ───────────────────────────────────────────────────────────────────
+const emptyPricing = (): Record<string, string> => {
+  const init: Record<string, string> = {};
+  SEASONS.forEach((s) => PERSONS.forEach((p) => (init[`${s.key}_${p}`] = "")));
+  return init;
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function TourPricingForm() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [tourId, setTourId] = useState<string>("");
   const [currency, setCurrency] = useState<string>("USD");
-  const [pricing, setPricing] = useState<Record<string, string>>(() => {
-    const init: Record<string, string> = {};
-    SEASONS.forEach((s) => PERSONS.forEach((p) => (init[`${s.key}_${p}`] = "")));
-    return init;
-  });
+  const [classification, setClassification] = useState<Classification>("economy");
+  const [pricing, setPricing] = useState<Record<string, string>>(emptyPricing);
   const [loading, setLoading] = useState(false);
   const [fetchingTours, setFetchingTours] = useState(true);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
@@ -91,7 +169,25 @@ export default function TourPricingForm() {
     })();
   }, []);
 
-  console.log("Tours fetched:", tours);
+  // When tour or classification changes, pre-fill existing prices
+  useEffect(() => {
+    if (!tourId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("tour_pricing")
+        .select("season, persons, price")
+        .eq("tour_id", tourId)
+        .eq("classification", classification);
+
+      const loaded = emptyPricing();
+      if (data) {
+        data.forEach((row: { season: string; persons: number; price: number }) => {
+          loaded[`${row.season}_${row.persons}`] = String(row.price);
+        });
+      }
+      setPricing(loaded);
+    })();
+  }, [tourId, classification]);
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -115,7 +211,10 @@ export default function TourPricingForm() {
       for (const p of PERSONS) {
         const val = pricing[`${s.key}_${p}`];
         if (val === "" || isNaN(Number(val))) {
-          setToast({ type: "error", msg: `Enter a valid price for ${s.label} – ${p} persons.` });
+          setToast({
+            type: "error",
+            msg: `Enter a valid price for ${s.label} – ${p} persons.`,
+          });
           return;
         }
         rows.push({ season: s.key, persons: p, price: val });
@@ -130,11 +229,12 @@ export default function TourPricingForm() {
         persons: r.persons,
         price: parseFloat(r.price),
         currency,
+        classification,
       }));
 
       const { error } = await supabase
         .from("tour_pricing")
-        .upsert(upsertData, { onConflict: "tour_id,season,persons" });
+        .upsert(upsertData, { onConflict: "tour_id,season,persons,classification" });
 
       if (error) throw error;
       setToast({ type: "success", msg: "Pricing saved successfully!" });
@@ -148,17 +248,16 @@ export default function TourPricingForm() {
 
   const handleReset = () => {
     setTourId("");
-    const reset: Record<string, string> = {};
-    SEASONS.forEach((s) => PERSONS.forEach((p) => (reset[`${s.key}_${p}`] = "")));
-    setPricing(reset);
+    setPricing(emptyPricing());
   };
+
+  const activeClass = CLASSIFICATIONS.find((c) => c.key === classification)!;
 
   return (
     <div
       className="min-h-screen py-10 px-4"
       style={{ background: "linear-gradient(135deg, #fdf6e3 0%, #f5e6c8 100%)" }}
     >
-      {/* Google Fonts */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
         * { font-family: 'Lato', sans-serif; }
@@ -182,10 +281,10 @@ export default function TourPricingForm() {
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-[#e8d5b0]">
-          {/* Tour + Currency row */}
+
+          {/* ── Tour + Currency ─────────────────────────────────────── */}
           <div className="px-8 pt-8 pb-6 border-b border-[#f0e0c0] bg-[#fffdf7]">
             <div className="flex flex-col sm:flex-row gap-4">
-              {/* Tour select */}
               <div className="flex-1">
                 <label className="block text-xs font-bold uppercase tracking-widest text-[#7a5c2e] mb-2">
                   Select Tour
@@ -207,7 +306,6 @@ export default function TourPricingForm() {
                 </select>
               </div>
 
-              {/* Currency */}
               <div className="sm:w-36">
                 <label className="block text-xs font-bold uppercase tracking-widest text-[#7a5c2e] mb-2">
                   Currency
@@ -225,14 +323,69 @@ export default function TourPricingForm() {
             </div>
           </div>
 
-          {/* Pricing sections */}
+          {/* ── Classification Picker ───────────────────────────────── */}
+          <div className="px-8 py-6 border-b border-[#f0e0c0] bg-white">
+            <label className="block text-xs font-bold uppercase tracking-widest text-[#7a5c2e] mb-3">
+              Price Classification
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {CLASSIFICATIONS.map((c) => {
+                const isActive = classification === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setClassification(c.key)}
+                    className={`
+                      relative flex flex-col items-center gap-1.5 px-3 py-4 rounded-xl border-2
+                      transition-all duration-150 text-center
+                      ${isActive
+                        ? `${c.activeBg} ${c.activeBorder} ${c.activeText} shadow-md scale-[1.02]`
+                        : `${c.inactiveBg} ${c.inactiveBorder} ${c.inactiveText} hover:border-[#e8d5b0] hover:shadow-sm`
+                      }
+                    `}
+                  >
+                    {isActive && (
+                      <span
+                        className="absolute top-2 right-2 w-2 h-2 rounded-full"
+                        style={{ background: c.color }}
+                      />
+                    )}
+                    <span className="text-2xl">{c.icon}</span>
+                    <span className="text-xs font-bold leading-tight">{c.label}</span>
+                    <span className={`text-[10px] leading-tight ${isActive ? "opacity-70" : "opacity-50"}`}>
+                      {c.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Active classification banner */}
+            <div
+              className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold"
+              style={{
+                background: `${activeClass.color}15`,
+                border: `1px solid ${activeClass.color}40`,
+                color: activeClass.color,
+              }}
+            >
+              <span>{activeClass.icon}</span>
+              <span>
+                Editing prices for{" "}
+                <span className="font-bold">{activeClass.label}</span> classification
+                {tourId ? " — existing prices pre-filled if available." : "."}
+              </span>
+            </div>
+          </div>
+
+          {/* ── Season Pricing ──────────────────────────────────────── */}
           <div className="p-8 space-y-6">
             {SEASONS.map((season) => (
               <div
                 key={season.key}
                 className={`rounded-xl overflow-hidden border-2 ${season.border}`}
               >
-                {/* Season header */}
                 <div className={`${season.bg} px-5 py-4`}>
                   <div className="flex flex-wrap items-center gap-3">
                     <span className={`font-display text-lg font-bold ${season.text}`}>
@@ -244,7 +397,6 @@ export default function TourPricingForm() {
                   </div>
                 </div>
 
-                {/* Persons grid */}
                 <div className="grid grid-cols-3 divide-x divide-[#e8d5b0] bg-[#fffdf7]">
                   {PERSONS.map((p) => (
                     <div key={p} className="p-4 flex flex-col gap-2">
@@ -275,7 +427,7 @@ export default function TourPricingForm() {
             ))}
           </div>
 
-          {/* Actions */}
+          {/* ── Actions ─────────────────────────────────────────────── */}
           <div className="px-8 pb-8 flex flex-col sm:flex-row gap-3 justify-end">
             <button
               type="button"
@@ -296,13 +448,12 @@ export default function TourPricingForm() {
                   Saving…
                 </>
               ) : (
-                "Save Pricing"
+                <>{activeClass.icon} Save {activeClass.label} Pricing</>
               )}
             </button>
           </div>
         </div>
 
-        {/* Helper note */}
         <p className="text-center text-xs text-[#a08050] mt-5">
           * Prices are per person per night. Existing entries will be updated (upsert).
         </p>
@@ -316,7 +467,10 @@ export default function TourPricingForm() {
         >
           <span className="text-lg">{toast.type === "success" ? "✓" : "✕"}</span>
           {toast.msg}
-          <button onClick={() => setToast(null)} className="ml-auto opacity-70 hover:opacity-100 text-lg leading-none">
+          <button
+            onClick={() => setToast(null)}
+            className="ml-auto opacity-70 hover:opacity-100 text-lg leading-none"
+          >
             ×
           </button>
         </div>

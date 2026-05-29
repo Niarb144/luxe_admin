@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { FaCrown } from "react-icons/fa";
+import { IoStarSharp, IoStarOutline } from "react-icons/io5";
+import { MdHotelClass } from "react-icons/md";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Season = "LOW" | "MID" | "HIGH";
@@ -35,13 +38,13 @@ const SEASONS: { key: Season; label: string; short: string; bg: string; text: st
 const PERSONS = [2, 4, 6];
 
 const CLASSIFICATIONS: {
-  key: Classification; label: string; icon: string;
+  key: Classification; label: string; icon: any;
   color: string; bg: string; text: string; border: string;
 }[] = [
-  { key: "economy",         label: "Economy",         icon: "🏕️", color: "#6b7280", bg: "bg-gray-100",    text: "text-gray-700",   border: "border-gray-300" },
-  { key: "comfort",         label: "Comfort",         icon: "🏡", color: "#b8830a", bg: "bg-amber-50",   text: "text-amber-800",  border: "border-amber-300" },
-  { key: "luxury",          label: "Luxury",          icon: "🦁", color: "#7c3aed", bg: "bg-violet-50",  text: "text-violet-800", border: "border-violet-300" },
-  { key: "superior_luxury", label: "Superior Luxury", icon: "✨", color: "#b45309", bg: "bg-yellow-50",  text: "text-yellow-800", border: "border-yellow-400" },
+  { key: "economy",         label: "Economy",         icon: <IoStarOutline />, color: "#6b7280", bg: "bg-gray-100",    text: "text-gray-700",   border: "border-gray-300" },
+  { key: "comfort",         label: "Comfort",         icon: <IoStarSharp />, color: "#b8830a", bg: "bg-amber-50",   text: "text-amber-800",  border: "border-amber-300" },
+  { key: "luxury",          label: "Luxury",          icon: <MdHotelClass />, color: "#7c3aed", bg: "bg-violet-50",  text: "text-violet-800", border: "border-violet-300" },
+  { key: "superior_luxury", label: "Superior Luxury", icon: <FaCrown />, color: "#b45309", bg: "bg-yellow-50",  text: "text-yellow-800", border: "border-yellow-400" },
 ];
 
 // ─── View Modal ───────────────────────────────────────────────────────────────
@@ -53,7 +56,7 @@ function ViewModal({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-[#e8d5b0]">
         {/* Header */}
         <div className="sticky top-0 bg-white px-7 pt-7 pb-4 border-b border-[#f0e0c0] flex items-start justify-between z-10">

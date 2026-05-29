@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { FaCrow, FaCrown } from "react-icons/fa";
+import { FaCrown } from "react-icons/fa";
 import { IoStarSharp, IoStarOutline } from "react-icons/io5";
 import { MdHotelClass } from "react-icons/md";
-import { FaC } from "react-icons/fa6";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Season = "LOW" | "MID" | "HIGH";

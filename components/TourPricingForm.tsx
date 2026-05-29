@@ -7,7 +7,7 @@ import { IoStarSharp, IoStarOutline } from "react-icons/io5";
 import { MdHotelClass } from "react-icons/md";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Season = "LOW" | "MID" | "HIGH";
+type Season = "LOW" | "HIGH" | "PEAK";
 type Classification = "economy" | "comfort" | "luxury" | "superior_luxury";
 
 interface Tour {
@@ -59,8 +59,8 @@ const SEASONS: SeasonMeta[] = [
     accent: "text-[#f5c97a]",
   },
   {
-    key: "MID",
-    label: "MID SEASON",
+    key: "HIGH",
+    label: "HIGH SEASON",
     subtitle: "Rest of the year",
     bg: "bg-[#b8830a]",
     border: "border-[#d49a10]",
@@ -69,8 +69,8 @@ const SEASONS: SeasonMeta[] = [
     accent: "text-white",
   },
   {
-    key: "HIGH",
-    label: "HIGH SEASON",
+    key: "PEAK",
+    label: "PEAK SEASON",
     subtitle: "January, July, Aug, Sep & Dec 20–31",
     bg: "bg-[#1c0d00]",
     border: "border-[#3d2008]",
@@ -136,7 +136,7 @@ const CLASSIFICATIONS: ClassificationMeta[] = [
   },
 ];
 
-const PERSONS = [2, 4, 6];
+const PERSONS = [1, 2, 4, 6];
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 const emptyPricing = (): Record<string, string> => {
@@ -327,7 +327,7 @@ export default function TourPricingForm() {
             <label className="block text-xs font-bold uppercase tracking-widest text-[#7a5c2e] mb-3">
               Price Classification
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {CLASSIFICATIONS.map((c) => {
                 const isActive = classification === c.key;
                 return (

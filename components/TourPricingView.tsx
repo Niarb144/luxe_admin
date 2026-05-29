@@ -7,7 +7,7 @@ import { IoStarSharp, IoStarOutline } from "react-icons/io5";
 import { MdHotelClass } from "react-icons/md";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Season = "LOW" | "MID" | "HIGH";
+type Season = "LOW" | "HIGH" | "PEAK";
 type Classification = "economy" | "comfort" | "luxury" | "superior_luxury";
 
 interface PricingRecord {
@@ -31,11 +31,11 @@ interface GroupedTour {
 // ─── Constants ────────────────────────────────────────────────────────────────
 const SEASONS: { key: Season; label: string; short: string; bg: string; text: string; dot: string }[] = [
   { key: "LOW",  label: "Low Season",  short: "LOW",  bg: "bg-[#3d2008]", text: "text-[#f5e6c8]", dot: "#7a4520" },
-  { key: "MID",  label: "Mid Season",  short: "MID",  bg: "bg-[#b8830a]", text: "text-white",      dot: "#b8830a" },
-  { key: "HIGH", label: "High Season", short: "HIGH", bg: "bg-[#1c0d00]", text: "text-[#f5e6c8]", dot: "#3d2008" },
+  { key: "HIGH",  label: "High Season",  short: "HIGH",  bg: "bg-[#b8830a]", text: "text-white",      dot: "#b8830a" },
+  { key: "PEAK", label: "Peak Season", short: "PEAK", bg: "bg-[#1c0d00]", text: "text-[#f5e6c8]", dot: "#3d2008" },
 ];
 
-const PERSONS = [2, 4, 6];
+const PERSONS = [1, 2, 4, 6];
 
 const CLASSIFICATIONS: {
   key: Classification; label: string; icon: any;
@@ -84,7 +84,7 @@ function ViewModal({
                 </div>
                 <div className="rounded-xl overflow-hidden border border-[#e8d5b0]">
                   {/* Table header */}
-                  <div className="grid grid-cols-4 bg-[#fffdf7] border-b border-[#e8d5b0]">
+                  <div className="grid grid-cols-5 bg-[#fffdf7] border-b border-[#e8d5b0]">
                     <div className="px-4 py-3 text-xs font-bold uppercase tracking-widest text-[#7a5c2e]">Season</div>
                     {PERSONS.map((p) => (
                       <div key={p} className="px-4 py-3 text-xs font-bold uppercase tracking-widest text-[#7a5c2e] text-right">
@@ -97,7 +97,7 @@ function ViewModal({
                     if (!seasonData) return null;
                     const currency = Object.values(seasonData)[0]?.currency ?? "USD";
                     return (
-                      <div key={s.key} className="grid grid-cols-4 border-b border-[#f0e0c0] last:border-0 hover:bg-[#fffdf7] transition-colors">
+                      <div key={s.key} className="grid grid-cols-5 border-b border-[#f0e0c0] last:border-0 hover:bg-[#fffdf7] transition-colors">
                         <div className={`px-4 py-3 flex items-center gap-2`}>
                           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.dot }} />
                           <span className="text-xs font-semibold text-[#3d2008]">{s.label}</span>

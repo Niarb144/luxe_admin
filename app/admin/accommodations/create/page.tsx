@@ -26,16 +26,13 @@ export default function AddAccommodation() {
 
   const [form, setForm] = useState({
     hotel_name: "",
-  country_location: "",
-  location: "",
-  accommodation_type: "",
-  description: "",
-  map_url: "",
-  classification: "Comfort",
+    country_location: "",
+    location: "",
+    accommodation_type: "",
+    description: "",
+    map_url: "",
+    classification: "Comfort",
   });
-
-  setAmenities([""]);
-  setServices([""]);
 
   useEffect(() => {
     fetchDestinations();
@@ -124,6 +121,7 @@ export default function AddAccommodation() {
       });
 
       setAmenities([""]);
+      setServices([""]);
       setFileList(null);
       setImagesPreview([]);
 

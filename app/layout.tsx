@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import RouteLoader from "@/components/RouteLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Luxe Plains Admin",
-  description: "Admin dashboard for managing tours, bookings, and content on the Luxe Plains website.",
+  description:
+    "Admin dashboard for managing tours, bookings, and content on the Luxe Plains website.",
 };
 
 export default function RootLayout({
@@ -24,7 +26,12 @@ export default function RootLayout({
 }>) {
   return (
     <html>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} min-h-full flex flex-col`}
+      >
+        <RouteLoader />
+        {children}
+      </body>
     </html>
   );
 }

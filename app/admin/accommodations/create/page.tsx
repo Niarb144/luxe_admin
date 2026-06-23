@@ -14,14 +14,6 @@ export default function AddAccommodation() {
   >([]);
   const [selectedDestination, setSelectedDestination] = useState("");
 
-  // const [form, setForm] = useState({
-  //   hotel_name: "",
-  //   country_location: "",
-  //   description: "",
-  //   map_url: "",
-  //   classification: "Comfort",
-  // });
-
   const [services, setServices] = useState([""]);
 
   const [form, setForm] = useState({
@@ -209,6 +201,7 @@ export default function AddAccommodation() {
         <option>Economy</option>
         <option>Comfort</option>
         <option>Luxury</option>
+        <option>Super Luxury</option>
       </select>
 
       <input

@@ -139,7 +139,7 @@ export default function AdminSidebar({
         onClick={() =>
           setMobileOpen(true)
         }
-        className="lg:hidden fixed top-4 left-4 z-50 bg-slate-900 text-white p-2 rounded-lg"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-slate-900 text-white p-2 rounded-lg cursor-pointer"
       >
         <Menu size={22} />
       </button>
@@ -164,7 +164,7 @@ export default function AdminSidebar({
           flex flex-col
           z-50
           transition-all duration-300
-
+          
           ${
             collapsed
               ? "w-20"
@@ -256,7 +256,7 @@ export default function AdminSidebar({
                         group.key
                       )
                     }
-                    className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800"
+                    className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
                       <Icon

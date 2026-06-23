@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 const SUGGESTIONS = [
@@ -13,7 +13,7 @@ const SUGGESTIONS = [
   "Airport Transfers",
 ];
 
-export default function Step3Exclusions({ tourId, next }: any) {
+export default function Step3Exclusions({ tourId, next, back }: any) {
   const [items, setItems] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,6 +40,19 @@ export default function Step3Exclusions({ tourId, next }: any) {
     }
   }
 
+  useEffect(()=> {
+     if (!tourId) return;
+    supabase
+      .from("tour_exclusions")
+      .select("item")
+      .eq("tour_id", tourId)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setItems(data.map((r: any) => r.item));
+        }
+      });
+  }), [tourId];
+
   async function save() {
     if (!tourId) return;
 
@@ -50,12 +63,16 @@ export default function Step3Exclusions({ tourId, next }: any) {
 
     setLoading(true);
 
+    await supabase.from("tour_exclusions").delete().eq("tour_id", tourId);
+
     const rows = items.map((item) => ({
       tour_id: tourId,
       item,
     }));
 
-    const { error } = await supabase.from("tour_exclusions").insert(rows);
+    const { error } = await supabase
+      .from("tour_exclusions")
+      .insert(items.map((item) => ({ tour_id: tourId, item })));
 
     if (error) {
       console.error(error);
@@ -117,14 +134,24 @@ export default function Step3Exclusions({ tourId, next }: any) {
           ))}
         </div>
 
-        {/* Action */}
-        <button
-          onClick={save}
-          disabled={loading}
-          className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer"
-        >
-          {loading ? "Saving..." : "Next Step"}
-        </button>
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={back}
+            className="py-3 px-6 rounded-lg border border-white/10 hover:bg-white/5 transition text-sm text-gray-400 cursor-pointer"
+          >
+            ← Back
+          </button>
+
+          <button
+            onClick={save}
+            disabled={loading}
+            className="flex-1 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer"
+          >
+            {loading ? "Saving..." : "Next Step"}
+          </button>
+        </div>
 
       </div>
     </div>

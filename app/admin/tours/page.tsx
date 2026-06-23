@@ -75,7 +75,7 @@ export default async function ToursPage() {
                     Edit
                   </Link>
                   <DeleteTour tour={tour} />
-                  <Link href={`/admin/tours/${tour.slug}/preview`} className="ml-4 text-green-500 hover:underline">
+                  <Link href={`/tours/${tour.slug}/preview`} target="_blank" className="ml-4 text-green-500 hover:underline">
                     Preview
                   </Link>
                 </td>

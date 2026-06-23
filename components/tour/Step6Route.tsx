@@ -1,12 +1,30 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-
-export default function Step6Route({ tourId, next }: any) {
+export default function Step6Route({ tourId, next, back }: any) {
   const [mapUrl, setMapUrl] = useState("");
+  const [existingId, setExistingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    if (!tourId) { setFetching(false); return; }
+
+    supabase
+      .from("tour_route_maps")
+      .select("id, map_url")
+      .eq("tour_id", tourId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setMapUrl(data.map_url);
+          setExistingId(data.id);
+        }
+        setFetching(false);
+      });
+  }, [tourId]);
 
   async function handleSave() {
     if (!tourId) return;
@@ -18,21 +36,44 @@ export default function Step6Route({ tourId, next }: any) {
 
     setLoading(true);
 
-    const { error } = await supabase
-      .from("tour_route_maps")
-      .insert({
-        tour_id: tourId,
-        map_url: mapUrl.trim(),
-      });
+    if (existingId) {
+      // Update in place — no need to delete/re-insert for a single row
+      const { error } = await supabase
+        .from("tour_route_maps")
+        .update({ map_url: mapUrl.trim() })
+        .eq("id", existingId);
 
-    if (error) {
-      console.error(error);
-      setLoading(false);
-      return;
+      if (error) {
+        console.error(error);
+        setLoading(false);
+        return;
+      }
+    } else {
+      const { data, error } = await supabase
+        .from("tour_route_maps")
+        .insert({ tour_id: tourId, map_url: mapUrl.trim() })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error(error);
+        setLoading(false);
+        return;
+      }
+
+      setExistingId(data.id);
     }
 
     setLoading(false);
     next();
+  }
+
+  if (fetching) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        Loading route map...
+      </div>
+    );
   }
 
   return (
@@ -42,12 +83,8 @@ export default function Step6Route({ tourId, next }: any) {
         <h1 className="text-3xl font-bold mb-2">Create Tour</h1>
         <p className="text-gray-500 mb-6">Step 6: Route Map</p>
 
-        {/* Input */}
         <div className="mb-4">
-          <label className="text-sm text-gray-500">
-            Google Maps Embed URL
-          </label>
-
+          <label className="text-sm text-gray-500">Google Maps Embed URL</label>
           <input
             type="text"
             placeholder="Paste Google Maps embed link..."
@@ -57,30 +94,32 @@ export default function Step6Route({ tourId, next }: any) {
           />
         </div>
 
-        {/* Helper */}
         <p className="text-xs text-gray-500 mb-6">
           Example: https://www.google.com/maps/embed?pb=...
         </p>
 
-        {/* Preview (optional but powerful) */}
         {mapUrl.includes("http") && (
           <div className="mb-6 rounded-lg overflow-hidden border border-white/10">
-            <iframe
-              src={mapUrl}
-              className="w-full h-64"
-              loading="lazy"
-            ></iframe>
+            <iframe src={mapUrl} className="w-full h-64" loading="lazy" />
           </div>
         )}
 
-        {/* Button */}
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold cursor-pointer"
-        >
-          {loading ? "Saving..." : "Next Step"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={back}
+            className="py-3 px-6 rounded-lg border border-white/10 hover:bg-white/5 transition text-sm text-gray-400 cursor-pointer"
+          >
+            ← Back
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="flex-1 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer disabled:opacity-60"
+          >
+            {loading ? "Saving..." : "Save & Continue →"}
+          </button>
+        </div>
 
       </div>
     </div>

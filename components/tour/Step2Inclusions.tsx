@@ -17,41 +17,50 @@ export default function Step2Inclusions({ tourId, next, back }: any) {
   const [items, setItems] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false); // ← guard against double-load
 
   function addItem(value: string) {
     const clean = value.trim();
     if (!clean) return;
-
-    // prevent duplicates
-    if (items.includes(clean)) return;
-
-    setItems([...items, clean]);
+    // check against current state, not a stale closure
+    setItems((prev) => {
+      if (prev.includes(clean)) return prev; // already present, no change
+      return [...prev, clean];
+    });
     setInput("");
   }
 
   function removeItem(item: string) {
-    setItems(items.filter((i) => i !== item));
+    setItems((prev) => prev.filter((i) => i !== item));
   }
 
-  function handleKeyDown(e: any) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
+      e.stopPropagation(); // prevent any parent form submission
       addItem(input);
     }
   }
 
+  // Load existing inclusions once — guarded by `fetched` flag to prevent
+  // re-loading on re-renders which would cause duplicates
   useEffect(() => {
-    if (!tourId) return;
+    setFetched(false);
+    setItems([]);
+  }, [tourId]);
+
+  useEffect(() => {
+    if (!tourId || fetched) return;
+
     supabase
       .from("tour_inclusions")
       .select("item")
       .eq("tour_id", tourId)
       .then(({ data }) => {
-        if (data && data.length > 0) {
-          setItems(data.map((r: any) => r.item));
-        }
+        setItems(Array.from(new Set(data?.map((r: any) => r.item) ?? [])));
+        setFetched(true);
       });
-  }, [tourId]);
+  }, [tourId, fetched]);
 
   async function save() {
     if (!tourId) return;
@@ -63,20 +72,24 @@ export default function Step2Inclusions({ tourId, next, back }: any) {
 
     setLoading(true);
 
-    await supabase.from("tour_inclusions").delete().eq("tour_id", tourId);
+    // Delete existing rows first (delete-then-insert pattern)
+    const { error: deleteError } = await supabase
+      .from("tour_inclusions")
+      .delete()
+      .eq("tour_id", tourId);
 
+    if (deleteError) {
+      console.error("Delete error:", deleteError);
+      setLoading(false);
+      return;
+    }
 
-    const rows = items.map((item) => ({
-      tour_id: tourId,
-      item,
-    }));
-
-    const { error } = await supabase
+    const { error: insertError } = await supabase
       .from("tour_inclusions")
       .insert(items.map((item) => ({ tour_id: tourId, item })));
 
-    if (error) {
-      console.error(error);
+    if (insertError) {
+      console.error("Insert error:", insertError);
       setLoading(false);
       return;
     }
@@ -94,17 +107,28 @@ export default function Step2Inclusions({ tourId, next, back }: any) {
 
         {/* Tag Input */}
         <div className="mb-4">
-          <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-black/40 border border-white/10">
-            
+          <div
+            className="flex flex-wrap gap-2 p-3 rounded-lg bg-black/40 border border-white/10"
+            onClick={() => {
+              // clicking the container focuses the input
+              const el = document.getElementById("inclusions-input");
+              el?.focus();
+            }}
+          >
+            {/* Tag chips — prefix with "tag-" */}
             {items.map((item) => (
               <span
-                key={item}
+                key={`tag-${item}`}  // ← was just `key={item}`
                 className="flex items-center gap-2 bg-amber-500 text-black px-3 py-1 rounded-full text-sm"
               >
                 {item}
                 <button
-                  onClick={() => removeItem(item)}
-                  className="text-black font-bold"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeItem(item);
+                  }}
+                  className="text-black font-bold leading-none"
                 >
                   ×
                 </button>
@@ -112,20 +136,22 @@ export default function Step2Inclusions({ tourId, next, back }: any) {
             ))}
 
             <input
+              id="inclusions-input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type and press Enter..."
-              className="flex-1 bg-transparent outline-none text-sm"
+              className="flex-1 min-w-[120px] bg-transparent outline-none text-sm"
             />
           </div>
         </div>
 
         {/* Suggestions */}
         <div className="flex flex-wrap gap-2 mb-6">
+          {/* Suggestion buttons — prefix with "suggestion-" */}
           {SUGGESTIONS.map((s) => (
             <button
-              key={s}
+              key={`suggestion-${s}`}  // ← was just `key={s}`
               type="button"
               onClick={() => addItem(s)}
               className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-sm"
@@ -146,6 +172,7 @@ export default function Step2Inclusions({ tourId, next, back }: any) {
           </button>
 
           <button
+            type="button" // ← explicit type
             onClick={save}
             disabled={loading}
             className="flex-1 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer"

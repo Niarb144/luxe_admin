@@ -14,10 +14,21 @@ export default function Step4Itinerary({ tourId, next, back }: any) {
   });
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [fetched, setFetched] = useState(false);
 
-  // Load existing itinerary on mount
+  // Reset when tourId changes
   useEffect(() => {
-    if (!tourId) { setFetching(false); return; }
+    setFetched(false);
+    setItems([]);
+    setFetching(true);
+  }, [tourId]);
+
+  // Fetch once per tourId
+  useEffect(() => {
+    if (!tourId || fetched) {
+      setFetching(false);
+      return;
+    }
 
     supabase
       .from("tour_itinerary")
@@ -27,17 +38,18 @@ export default function Step4Itinerary({ tourId, next, back }: any) {
       .order("sort_order", { ascending: true })
       .then(({ data }) => {
         if (data && data.length > 0) setItems(data);
+        setFetched(true);
         setFetching(false);
       });
-  }, [tourId]);
+  }, [tourId, fetched]);
 
   function addItem() {
     if (!form.title.trim() || !form.description.trim()) return;
 
     const dayItems = items.filter((i) => i.day_number === form.day_number);
 
-    setItems([
-      ...items,
+    setItems((prev) => [
+      ...prev,
       {
         ...form,
         // No `id` — marks it as a new unsaved item
@@ -48,29 +60,32 @@ export default function Step4Itinerary({ tourId, next, back }: any) {
     setForm({ ...form, title: "", description: "", start_time: "", end_time: "" });
   }
 
-  // Remove by stable identity: db items have an `id`, new items matched by index
+  // Remove by stable identity: db items have an `id`, new items matched by flat index
   function removeItem(item: any, index: number) {
     if (item.id) {
-      setItems(items.filter((i) => i.id !== item.id));
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
     } else {
-      setItems(items.filter((_, i) => i !== index));
+      setItems((prev) => prev.filter((_, i) => i !== index));
     }
   }
 
   async function save() {
     if (!tourId) return;
-    if (items.length === 0) { alert("Add at least one itinerary item"); return; }
+    if (items.length === 0) {
+      alert("Add at least one itinerary item");
+      return;
+    }
 
     setLoading(true);
 
-    // Delete all existing rows and re-insert the full current list
     const { error: deleteError } = await supabase
       .from("tour_itinerary")
       .delete()
       .eq("tour_id", tourId);
 
     if (deleteError) {
-      console.error(deleteError);
+      console.error("Delete failed:", deleteError);
+      alert("Failed to update itinerary. Please try again.");
       setLoading(false);
       return;
     }
@@ -85,10 +100,13 @@ export default function Step4Itinerary({ tourId, next, back }: any) {
       day_number: item.day_number,
     }));
 
-    const { error } = await supabase.from("tour_itinerary").insert(rows);
+    const { error: insertError } = await supabase
+      .from("tour_itinerary")
+      .insert(rows);
 
-    if (error) {
-      console.error(error);
+    if (insertError) {
+      console.error("Insert failed:", insertError);
+      alert("Failed to save itinerary. Please try again.");
       setLoading(false);
       return;
     }
@@ -190,20 +208,21 @@ export default function Step4Itinerary({ tourId, next, back }: any) {
             <p className="text-gray-500 text-sm">No itinerary added yet</p>
           ) : (
             sortedDays.map((day) => (
-              <div key={day}>
+              <div key={`day-${day}`}>
                 <h2 className="font-bold text-amber-400 mb-3 flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-sm">
                     Day {day}
                   </span>
                   <span className="text-xs text-gray-500 font-normal">
-                    {grouped[day].length} {grouped[day].length === 1 ? "activity" : "activities"}
+                    {grouped[day].length}{" "}
+                    {grouped[day].length === 1 ? "activity" : "activities"}
                   </span>
                 </h2>
 
                 <div className="space-y-2 pl-2 border-l border-amber-500/20">
                   {grouped[day].map((item: any) => (
                     <div
-                      key={item.id ?? item._flatIndex}
+                      key={item.id ? `db-${item.id}` : `new-${item._flatIndex}`}
                       className="bg-black/40 border border-white/10 rounded-lg p-3"
                     >
                       <div className="flex justify-between items-start gap-2">
@@ -219,6 +238,7 @@ export default function Step4Itinerary({ tourId, next, back }: any) {
                           )}
                         </div>
                         <button
+                          type="button"
                           onClick={() => removeItem(item, item._flatIndex)}
                           className="text-red-400 hover:text-red-300 text-xs shrink-0 cursor-pointer mt-0.5"
                         >
@@ -243,6 +263,7 @@ export default function Step4Itinerary({ tourId, next, back }: any) {
             ← Back
           </button>
           <button
+            type="button"
             onClick={save}
             disabled={loading}
             className="flex-1 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer disabled:opacity-60"

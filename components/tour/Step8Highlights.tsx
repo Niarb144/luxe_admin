@@ -4,17 +4,37 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { highlightIcons } from "@/lib/highlightIcons";
 
+type Highlight = {
+  id?: string;
+  icon: string;
+  title: string;
+  description: string;
+};
+
+type HighlightField = "icon" | "title" | "description";
+
 export default function Step8Highlights({ tourId, next, back }: any) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [fetched, setFetched] = useState(false);
 
-  const [highlights, setHighlights] = useState([
+  const [highlights, setHighlights] = useState<Highlight[]>([
     { icon: "PawPrint", title: "", description: "" },
   ]);
 
-  // Load existing highlights on mount
+  // Reset when tourId changes
   useEffect(() => {
-    if (!tourId) { setFetching(false); return; }
+    setFetched(false);
+    setHighlights([{ icon: "PawPrint", title: "", description: "" }]);
+    setFetching(true);
+  }, [tourId]);
+
+  // Fetch once per tourId
+  useEffect(() => {
+    if (!tourId || fetched) {
+      setFetching(false);
+      return;
+    }
 
     supabase
       .from("tour_highlights")
@@ -32,24 +52,28 @@ export default function Step8Highlights({ tourId, next, back }: any) {
             }))
           );
         }
+        setFetched(true);
         setFetching(false);
       });
-  }, [tourId]);
-
-  type HighlightField = "icon" | "title" | "description";
+  }, [tourId, fetched]);
 
   const addHighlight = () => {
-    setHighlights([...highlights, { icon: "PawPrint", title: "", description: "" }]);
+    setHighlights((prev) => [
+      ...prev,
+      { icon: "PawPrint", title: "", description: "" },
+    ]);
   };
 
   const updateHighlight = (index: number, field: HighlightField, value: string) => {
-    const updated = [...highlights];
-    updated[index] = { ...updated[index], [field]: value };
-    setHighlights(updated);
+    setHighlights((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
   };
 
   const removeHighlight = (index: number) => {
-    setHighlights(highlights.filter((_, i) => i !== index));
+    setHighlights((prev) => prev.filter((_, i) => i !== index));
   };
 
   async function handleSave() {
@@ -64,15 +88,14 @@ export default function Step8Highlights({ tourId, next, back }: any) {
 
     setLoading(true);
 
-    // Delete all existing then re-insert current list
     const { error: deleteError } = await supabase
       .from("tour_highlights")
       .delete()
       .eq("tour_id", tourId);
 
     if (deleteError) {
-      console.error(deleteError);
-      alert("Failed to save highlights");
+      console.error("Delete failed:", deleteError);
+      alert("Failed to update highlights. Please try again.");
       setLoading(false);
       return;
     }
@@ -84,16 +107,18 @@ export default function Step8Highlights({ tourId, next, back }: any) {
       description: item.description,
     }));
 
-    const { error } = await supabase.from("tour_highlights").insert(payload);
+    const { error: insertError } = await supabase
+      .from("tour_highlights")
+      .insert(payload);
 
-    setLoading(false);
-
-    if (error) {
-      console.error(error);
-      alert("Failed to save highlights");
+    if (insertError) {
+      console.error("Insert failed:", insertError);
+      alert("Failed to save highlights. Please try again.");
+      setLoading(false);
       return;
     }
 
+    setLoading(false);
     next();
   }
 
@@ -113,8 +138,10 @@ export default function Step8Highlights({ tourId, next, back }: any) {
         <p className="text-gray-500 mb-8">Add key experiences guests should expect</p>
 
         {highlights.map((item, index) => (
-          <div key={index} className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-6">
-
+          <div
+            key={item.id ? `db-${item.id}` : `new-${index}`}
+            className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-6"
+          >
             {/* Icon Selection */}
             <div className="mb-4">
               <label className="text-sm text-gray-300">Select Icon</label>
@@ -123,7 +150,7 @@ export default function Step8Highlights({ tourId, next, back }: any) {
                   const Icon = iconItem.icon;
                   return (
                     <button
-                      key={iconItem.name}
+                      key={`icon-${iconItem.name}`}
                       type="button"
                       onClick={() => updateHighlight(index, "icon", iconItem.name)}
                       className={`p-3 rounded-xl border transition cursor-pointer ${
@@ -159,6 +186,7 @@ export default function Step8Highlights({ tourId, next, back }: any) {
             />
 
             <button
+              type="button"
               onClick={() => removeHighlight(index)}
               className="text-red-400 mt-4 text-sm cursor-pointer hover:text-red-300 transition"
             >
@@ -168,6 +196,7 @@ export default function Step8Highlights({ tourId, next, back }: any) {
         ))}
 
         <button
+          type="button"
           onClick={addHighlight}
           className="bg-amber-500 hover:bg-amber-600 text-black px-5 py-3 rounded-xl font-semibold cursor-pointer mb-6 block"
         >
@@ -184,6 +213,7 @@ export default function Step8Highlights({ tourId, next, back }: any) {
             ← Back
           </button>
           <button
+            type="button"
             onClick={handleSave}
             disabled={loading}
             className="flex-1 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer disabled:opacity-60"

@@ -66,10 +66,6 @@ export default function AdminSidebar({
           name: "Tour Pricing",
           href: "/admin/pricing",
         },
-        {
-          name: "Edit Tours",
-          href: "/admin/tours/edit",
-        },
       ],
     },
     {

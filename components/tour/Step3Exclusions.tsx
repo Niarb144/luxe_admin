@@ -141,7 +141,7 @@ export default function Step3Exclusions({ tourId, next, back }: any) {
                     e.stopPropagation();
                     removeItem(item);
                   }}
-                  className="text-black font-bold leading-none"
+                  className="text-black font-bold leading-none cursor-pointer"
                 >
                   ×
                 </button>
@@ -166,7 +166,7 @@ export default function Step3Exclusions({ tourId, next, back }: any) {
               key={`suggestion-${s}`}
               type="button"
               onClick={() => addItem(s)}
-              className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-sm"
+              className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-sm cursor-pointer"
             >
               + {s}
             </button>
@@ -178,7 +178,7 @@ export default function Step3Exclusions({ tourId, next, back }: any) {
           <button
             type="button"
             onClick={back}
-            className="py-3 px-6 rounded-lg border border-white/10 hover:bg-white/5 transition text-sm text-gray-400 cursor-pointer"
+            className="py-3 px-6 rounded-lg border border-gray-600/10 hover:bg-gray-600/5 transition text-sm text-gray-600 cursor-pointer"
           >
             ← Back
           </button>
@@ -189,7 +189,7 @@ export default function Step3Exclusions({ tourId, next, back }: any) {
             disabled={loading}
             className="flex-1 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition font-semibold text-black cursor-pointer"
           >
-            {loading ? "Saving..." : "Next Step"}
+            {loading ? "Saving..." : "Save & Continue →"}
           </button>
         </div>
 

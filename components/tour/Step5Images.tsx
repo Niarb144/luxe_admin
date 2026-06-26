@@ -316,7 +316,7 @@ export default function Step5Images({ tourId, next, back }: any) {
           <button
             type="button"
             onClick={back}
-            className="py-3 px-6 rounded-lg border border-white/10 hover:bg-white/5 transition text-sm text-gray-400 cursor-pointer"
+            className="py-3 px-6 rounded-lg border border-gray-600/10 hover:bg-gray-600/5 transition text-sm text-gray-600 cursor-pointer"
           >
             ← Back
           </button>

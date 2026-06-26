@@ -152,26 +152,20 @@ export default function AdminSidebar({
 
       <aside
         className={`
-          fixed lg:static
-          top-0 left-0
+          fixed lg:sticky          {/* sticky instead of static */}
+          top-0                    {/* stick to top of viewport */}
           h-screen
+          overflow-y-auto          {/* sidebar scrolls independently */}
           bg-slate-900
           text-white
           flex flex-col
           z-50
           transition-all duration-300
+          shrink-0                 {/* prevent flex from shrinking it */}
           
-          ${
-            collapsed
-              ? "w-20"
-              : "w-72"
-          }
+          ${collapsed ? "w-20" : "w-72"}
 
-          ${
-            mobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
         {/* Header */}
